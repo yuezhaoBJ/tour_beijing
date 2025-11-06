@@ -380,7 +380,36 @@
                 padding: 14px;
             }
         }
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            background: rgba(60, 179, 113, 0.95);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-weight: bold;
+            z-index: 9999;
+            display: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        /* 地图标记颜色（自定义 DivIcon 小圆点） */
+        .cp-pin {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .cp-pin.pending { background: #DC143C; }
+        .cp-pin.completed { background: #2E8B57; }
     </style>
+    <!-- Leaflet 地图样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 <script>
     // 将所有函数定义放在全局作用域，确保onclick事件可以访问
@@ -394,6 +423,8 @@
             knowledge: "故宫最大的宫殿，是皇帝举行最重要仪式的地方，比如登基、结婚。屋顶上有10个神兽，代表最高等级！",
             pose: '"我是皇帝"：双手叉腰，抬头挺胸，做出威风凛凛的样子。',
             image: "tahe.jpg",
+            lat: 39.916345,
+            lng: 116.397155,
             completed: false
         },
         {
@@ -404,6 +435,8 @@
             knowledge: '皇帝住的地方，也是处理日常政务的地方。殿内挂着"正大光明"的牌匾，是清朝皇帝选继承人的秘密。',
             pose: '"正大光明"：一只手指向"正大光明"牌匾，另一只手竖起大拇指。',
             image: "qianqing.jpg",
+            lat: 39.91741,
+            lng: 116.39727,
             completed: false
         },
         {
@@ -414,6 +447,8 @@
             knowledge: "皇帝和家人们散步、玩耍的花园。里面有很多奇形怪状的石头和古老的树木，像一个迷宫。",
             pose: '"神兽守卫"：模仿御花园里的石狮子，做出威武的蹲坐姿势。',
             image: "yuhuayuan.jpg",
+            lat: 39.91822,
+            lng: 116.39722,
             completed: false
         },
         {
@@ -424,6 +459,8 @@
             knowledge: "一面巨大的彩色墙壁，上面有九条活灵活现的龙。它们代表着皇帝的至高无上。数一数，是不是真的有九条龙？",
             pose: '"飞龙在天"：双臂张开，像龙一样在空中飞翔。',
             image: "jiulongbi.jpg",
+            lat: 39.91943,
+            lng: 116.39705,
             completed: false
         },
         {
@@ -434,11 +471,20 @@
             knowledge: "故宫城墙的四个角上都有一个漂亮的角楼，像一座小小的仙宫。传说它有九梁十八柱七十二条脊。",
             pose: '"瞭望远方"：一只手搭在额头上，做出向远方眺望的姿势。',
             image: "jiaolou.jpg",
+            lat: 39.92303,
+            lng: 116.40252,
             completed: false
         }
     ];
 
     let currentCheckpointId = null;
+
+    // 地图实例（懒加载）
+    let mapInstance = null;
+    let markerLayer = null;
+    let userLocationLayer = null;
+    let pendingIcon = null;
+    let completedIcon = null;
 
     // 页面切换函数
     function showPage(pageId) {
@@ -448,7 +494,7 @@
         document.getElementById(pageId).classList.add('active');
 
         if (pageId === 'list-page') {
-            renderCheckpointList();
+            renderCheckpointMap();
         }
     }
 
@@ -463,44 +509,95 @@
         progressText.textContent = completedCount + '/5';
     }
 
-    // 渲染打卡点列表
-    function renderCheckpointList() {
-        const list = document.getElementById('checkpoint-list');
-        list.innerHTML = '';
-        let completedCount = 0;
-
-        checkpoints.forEach(cp => {
-            const item = document.createElement('li');
-            item.className = 'checkpoint-item' + (cp.completed ? ' completed' : '');
-            item.setAttribute('data-id', cp.id);
-            item.onclick = () => showDetail(cp.id);
-
-            const statusText = cp.completed ? `✓ 已获得 ${cp.badgeName} 徽章` : '▶ 去打卡';
-
-            item.innerHTML = `
-                    <div class="item-info">
-                        <h3>${cp.id}. ${cp.name}</h3>
-                        <p>${cp.knowledge.substring(0, 25)}...</p>
-                    </div>
-                    <div class="item-status">${statusText}</div>
-                `;
-            list.appendChild(item);
-
-            if (cp.completed) {
-                completedCount++;
-            }
-        });
-
-        // 更新进度条
+    // 渲染打卡点地图
+    function renderCheckpointMap() {
+        // 更新进度条与奖励提示
+        let completedCount = checkpoints.filter(cp => cp.completed).length;
         updateProgress();
-
-        // 检查是否完成所有打卡点
         const rewardPrompt = document.getElementById('reward-prompt');
-        if (completedCount === checkpoints.length) {
-            rewardPrompt.style.display = 'block';
-        } else {
-            rewardPrompt.style.display = 'none';
+        rewardPrompt.style.display = completedCount === checkpoints.length ? 'block' : 'none';
+
+        // 首次创建地图
+        if (!mapInstance) {
+            const defaultCenter = [39.9173, 116.3972]; // 故宫中轴近似
+            mapInstance = L.map('map', {
+                center: defaultCenter,
+                zoom: 16,
+                scrollWheelZoom: false
+            });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(mapInstance);
+            markerLayer = L.layerGroup().addTo(mapInstance);
+
+            // 定义两种状态的标记样式
+            pendingIcon = L.divIcon({
+                className: '',
+                html: '<div class="cp-pin pending"></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            });
+            completedIcon = L.divIcon({
+                className: '',
+                html: '<div class="cp-pin completed"></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            });
         }
+
+        // 清空并重新绘制标记
+        markerLayer.clearLayers();
+        const bounds = [];
+        checkpoints.forEach(cp => {
+            if (typeof cp.lat !== 'number' || typeof cp.lng !== 'number') return;
+            const marker = L.marker([cp.lat, cp.lng], {
+                title: cp.name,
+                icon: cp.completed ? completedIcon : pendingIcon
+            });
+            const statusText = cp.completed ? `✓ 已获得 ${cp.badgeName} 徽章` : '▶ 去打卡';
+            const popupHtml = `
+                <div style="min-width:200px">
+                    <img src="${cp.image}" alt="缩略图" style="width:100%;height:90px;object-fit:cover;border-radius:8px;margin-bottom:6px;" />
+                    <div style=\"font-weight:bold;color:#8B0000;margin-bottom:6px;\">${cp.id}. ${cp.name}</div>
+                    <div style=\"color:#666;margin-bottom:8px;\">${cp.knowledge.substring(0, 28)}...</div>
+                    <button style=\"background:#FFD700;color:#8B0000;border:none;border-radius:16px;padding:6px 10px;font-weight:bold;cursor:pointer;\" onclick=\"showDetail(${cp.id})\">${statusText}</button>
+                </div>
+            `;
+            marker.bindPopup(popupHtml);
+            marker.addTo(markerLayer);
+            bounds.push([cp.lat, cp.lng]);
+        });
+        if (bounds.length > 0) {
+            mapInstance.fitBounds(bounds, { padding: [20, 20] });
+        }
+
+        // 触发地图尺寸重算（页面切换后）
+        setTimeout(() => { mapInstance.invalidateSize(); }, 50);
+    }
+
+    // 地理定位到用户当前位置
+    function locateMe() {
+        if (!mapInstance) return;
+        if (!navigator.geolocation) {
+            alert('当前设备不支持定位');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const acc = pos.coords.accuracy || 50;
+            if (!userLocationLayer) {
+                userLocationLayer = L.layerGroup().addTo(mapInstance);
+            }
+            userLocationLayer.clearLayers();
+            const me = L.marker([lat, lng], { title: '我的位置' });
+            const circle = L.circle([lat, lng], { radius: acc, color: '#2E8B57', fillColor: '#3CB371', fillOpacity: 0.2, weight: 1 });
+            userLocationLayer.addLayer(circle);
+            userLocationLayer.addLayer(me);
+            mapInstance.fitBounds(L.latLngBounds([[lat, lng], [lat, lng]]).pad(0.02));
+        }, err => {
+            alert('定位失败，请检查定位权限');
+        }, { enableHighAccuracy: true, timeout: 8000 });
     }
 
     // 显示打卡详情
@@ -536,7 +633,8 @@
         const cp = checkpoints.find(c => c.id === currentCheckpointId);
         if (cp && !cp.completed) {
             cp.completed = true;
-            alert(`🎉 恭喜你！成功完成 ${cp.name} 的打卡任务，获得了 ${cp.badgeName} 徽章！\n\n线索提示：${getHint(cp.id)}`);
+            const msg = `🎉 恭喜你！成功完成 ${cp.name} 的打卡任务，获得了 ${cp.badgeName} 徽章！ 线索：${getHint(cp.id)}`;
+            showToast(msg);
             showPage('list-page'); // 返回列表页
         }
     }
@@ -563,8 +661,25 @@
     document.addEventListener('DOMContentLoaded', () => {
         // 首次加载时，显示首页
         showPage('home-page');
-        renderCheckpointList(); // 确保列表数据初始化
+        // 切到列表页时再渲染地图
     });
+
+    // Toast 提示
+    function showToast(message) {
+        let toast = document.getElementById('global-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'global-toast';
+            toast.className = 'toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.style.display = 'block';
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+            toast.style.display = 'none';
+        }, 2600);
+    }
 </script>
 
 <body>
@@ -592,9 +707,10 @@
                         <span id="progress-text">0/5</span>
                     </div>
                 </div>
-                <ul class="checkpoint-list" id="checkpoint-list">
-                    <!-- 列表项将由JS动态生成 -->
-                </ul>
+                <div class="map-actions" style="display:flex; gap:10px; margin-bottom:12px; justify-content:flex-end;">
+                    <button class="start-button" style="padding:10px 16px; font-size:1em; margin:0;" onclick="locateMe()">📍 定位到我</button>
+                </div>
+                <div id="map" style="width:100%; height: 420px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
                 <div id="reward-prompt" style="text-align: center; margin-top: 20px; display: none;">
                     <button class="start-button" onclick="showPage('reward-page')">领取终极奖励！</button>
                 </div>
@@ -639,7 +755,8 @@
     </main>
     </div>
 
-
+ <!-- Leaflet 脚本 -->
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </body>
 
 </html>
