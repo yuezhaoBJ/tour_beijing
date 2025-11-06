@@ -1,0 +1,96 @@
+/* 基础样式 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif; background: linear-gradient(135deg, #FFF8DC 0%, #FFE4B5 100%); color: #333; min-height: 100vh; }
+.container { max-width: 600px; margin: 0 auto; background-color: #fff; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); min-height: 100vh; display: flex; flex-direction: column; }
+header { background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%); color: white; padding: 25px 20px; text-align: center; font-size: 1.8em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); border-bottom: 5px solid #FFD700; }
+main { padding: 20px; flex: 1; overflow-y: auto; }
+h1, h2 { color: #8B0000; text-align: center; margin-bottom: 15px; font-size: 1.5em; }
+p { line-height: 1.8; margin-bottom: 10px; font-size: 1em; }
+
+/* 首页样式 */
+#home-page { text-align: center; }
+.story-intro { margin-top: 20px; padding: 20px; border: 3px solid #FFD700; border-radius: 15px; background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.story-intro p { font-size: 1.05em; text-align: left; }
+.start-button { display: inline-block; background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%); color: #8B0000; padding: 18px 35px; margin-top: 30px; margin-bottom: 20px; border-radius: 50px; font-size: 1.3em; font-weight: bold; text-decoration: none; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); transition: all 0.3s; border: 2px solid #8B0000; cursor: pointer; }
+.start-button:hover { background: linear-gradient(135deg, #FFC700 0%, #FFB700 100%); }
+.start-button:active { transform: scale(0.95); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+
+/* 列表页样式 */
+.progress-bar { width: 100%; height: 30px; background-color: #e0e0e0; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #3CB371 0%, #2E8B57 100%); transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9em; }
+.map-view { width: 100%; height: 420px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+
+/* 详情页样式 */
+.detail-image { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+.detail-knowledge { background-color: #F5F5F5; padding: 15px; border-radius: 8px; margin-bottom: 15px; line-height: 1.8; font-size: 1em; }
+.pose-box { background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%); border: 2px dashed #FFD700; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.pose-box h4 { color: #8B0000; margin-top: 0; margin-bottom: 10px; font-size: 1.1em; }
+.pose-text { font-size: 1.05em; line-height: 1.6; color: #333; }
+.action-button { display: block; width: 100%; padding: 16px; text-align: center; font-size: 1.1em; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: all 0.3s; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+.check-in-button { background: linear-gradient(135deg, #3CB371 0%, #2E8B57 100%); color: white; }
+.check-in-button:active { transform: scale(0.98); }
+.check-in-button:disabled { background-color: #ccc; cursor: not-allowed; opacity: 0.6; }
+.back-button { background-color: #ddd; color: #333; }
+.back-button:active { background-color: #bbb; }
+
+.badge-info { text-align: center; margin-top: 15px; padding: 15px; border: 2px solid #FFD700; border-radius: 10px; background-color: #FFFACD; }
+.badge-info img { width: 100px; height: 100px; margin-bottom: 10px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+.badge-info p { margin: 0; font-weight: bold; color: #8B0000; }
+
+/* 终极奖励页样式 */
+#reward-page { text-align: center; }
+.trophy { font-size: 6em; margin: 20px 0; animation: bounce 2s infinite; }
+@keyframes bounce { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-20px);} }
+.certificate { border: 5px double #8B0000; padding: 25px; margin-top: 20px; background: linear-gradient(135deg, #FDF5E6 0%, #FFFACD 100%); border-radius: 10px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+.certificate h2 { font-size: 1.6em; margin-bottom: 15px; color: #8B0000; }
+.certificate p { font-size: 1.05em; line-height: 1.8; margin-bottom: 10px; }
+.seal-image { width: 100%; max-width: 300px; height: auto; margin-top: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+
+/* 页面显示控制 */
+.page { display: none; animation: fadeIn 0.3s ease-in; }
+.page.active { display: block; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* 响应式 */
+@media (max-width:480px){ header{ font-size:1.5em; padding:20px 15px;} h1,h2{ font-size:1.3em;} .start-button{ font-size:1.1em; padding:15px 30px;} .action-button{ font-size:1em; padding:14px;} }
+
+/* Toast 提示（保留以备通用提示使用） */
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: rgba(60,179,113,0.95); color: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-weight: bold; z-index: 9999; display: none; max-width: 90%; text-align: center; }
+
+/* 地图小圆点样式（已换3D图标，保留备用） */
+.cp-pin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.2); }
+.cp-pin.pending { background: #DC143C; }
+.cp-pin.completed { background: #2E8B57; }
+
+/* 首页横幅图 */
+.home-hero { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-top: 16px; margin-bottom: 16px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+
+/* 首页徽章汇总 + 横向滚动 */
+.badge-collection { margin-top: 16px; padding: 14px; border: 2px solid #FFD700; border-radius: 12px; background: #FFFBEA; }
+.badge-collection h3 { margin: 0 0 10px 0; color: #8B0000; font-size: 1.15em; text-align: left; }
+.badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: center; }
+.badge-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border-radius: 10px; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.badge-item img { width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+.badge-item span { margin-top: 6px; font-size: 0.85em; color: #8B0000; font-weight: bold; }
+.badge-locked img { filter: grayscale(100%) opacity(0.5); }
+.badge-scroll { display: inline-flex; gap: 10px; align-items: stretch; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; scroll-snap-type: x proximity; }
+.badge-scroll .badge-item { min-width: 84px; scroll-snap-align: start; }
+
+/* 获得徽章弹出动画 */
+.badge-earned-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); z-index: 10000; }
+.badge-earned-card { background: #FFFDF5; border: 3px solid #FFD700; border-radius: 14px; padding: 18px 16px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.25); transform: scale(0.6); opacity: 0; animation: popIn 600ms ease forwards; }
+.badge-earned-card img { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); }
+.badge-earned-card h4 { margin: 10px 0 0 0; color: #8B0000; }
+.badge-earned-hint { margin-top: 8px; color: #333; font-size: 0.95em; }
+@keyframes popIn { 0%{ transform: scale(0.6); opacity:0;} 60%{ transform: scale(1.08); opacity:1;} 100%{ transform: scale(1); opacity:1;} }
+
+/* 任务区域 */
+.task-box { background: #FFFFFF; border: 2px solid #FFD700; border-radius: 10px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 12px; }
+.photo-row { display: flex; gap: 12px; align-items: center; }
+.photo-preview { width: 110px; height: 78px; border-radius: 8px; object-fit: cover; background: #f2f2f2; }
+.quiz-image { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+.quiz-options { list-style: none; padding: 0; margin: 8px 0 0 0; }
+.quiz-options li { margin-bottom: 8px; }
+.quiz-hint { color: #8B0000; font-size: 0.92em; margin-top: 6px; }
+
+
