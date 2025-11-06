@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>故宫寻宝：神兽大作战</title>
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'SimHei', sans-serif;
+            background: linear-gradient(135deg, #FFF8DC 0%, #FFE4B5 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            border-bottom: 5px solid #FFD700;
+        }
+
+        main {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        h1,
+        h2 {
+            color: #8B0000;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        p {
+            line-height: 1.8;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        /* 首页样式 */
+        #home-page {
+            text-align: center;
+        }
+
+        .story-intro {
+            margin-top: 20px;
+            padding: 20px;
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .story-intro p {
+            font-size: 1.05em;
+            text-align: left;
+        }
+
+        .start-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+            color: #8B0000;
+            padding: 18px 35px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            border: 2px solid #8B0000;
+            cursor: pointer;
+        }
+
+        .start-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-button:hover {
+            background: linear-gradient(135deg, #FFC700 0%, #FFB700 100%);
+        }
+
+        /* 列表页样式 */
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3CB371 0%, #2E8B57 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .checkpoint-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checkpoint-item {
+            background: linear-gradient(135deg, #FDF5E6 0%, #FFFACD 100%);
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #8B0000;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkpoint-item:active {
+            transform: translateX(5px);
+        }
+
+        .checkpoint-item.completed {
+            border-left: 5px solid #3CB371;
+            background: linear-gradient(135deg, #F0FFF0 0%, #E0FFE0 100%);
+        }
+
+        .item-info h3 {
+            margin: 0 0 5px 0;
+            color: #8B0000;
+            font-size: 1.1em;
+        }
+
+        .item-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .item-status {
+            font-weight: bold;
+            color: #8B0000;
+            font-size: 0.95em;
+            padding: 5px 10px;
+            background-color: #FFE4B5;
+            border-radius: 20px;
+        }
+
+        .checkpoint-item.completed .item-status {
+            color: white;
+            background-color: #3CB371;
+        }
+
+        /* 详情页样式 */
+        .detail-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .detail-knowledge {
+            background-color: #F5F5F5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            line-height: 1.8;
+            font-size: 1em;
+        }
+
+        .pose-box {
+            background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%);
+            border: 2px dashed #FFD700;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .pose-box h4 {
+            color: #8B0000;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .pose-text {
+            font-size: 1.05em;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .action-button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .check-in-button {
+            background: linear-gradient(135deg, #3CB371 0%, #2E8B57 100%);
+            color: white;
+        }
+
+        .check-in-button:active {
+            transform: scale(0.98);
+        }
+
+        .check-in-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .back-button {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .back-button:active {
+            background-color: #bbb;
+        }
+
+        .badge-info {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            background-color: #FFFACD;
+        }
+
+        .badge-info img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .badge-info p {
+            margin: 0;
+            font-weight: bold;
+            color: #8B0000;
+        }
+
+        /* 终极奖励页样式 */
+        #reward-page {
+            text-align: center;
+        }
+
+        .trophy {
+            font-size: 6em;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .certificate {
+            border: 5px double #8B0000;
+            padding: 25px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #FDF5E6 0%, #FFFACD 100%);
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .certificate h2 {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            color: #8B0000;
+        }
+
+        .certificate p {
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .seal-image {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 隐藏页面 */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            header {
+                font-size: 1.5em;
+                padding: 20px 15px;
+            }
+
+            h1,
+            h2 {
+                font-size: 1.3em;
+            }
+
+            .start-button {
+                font-size: 1.1em;
+                padding: 15px 30px;
+            }
+
+            .action-button {
+                font-size: 1em;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<script>
+    // 将所有函数定义放在全局作用域，确保onclick事件可以访问
+    // 故宫打卡点数据
+    const checkpoints = [
+        {
+            id: 1,
+            name: "太和殿 (金銮殿)",
+            badgeName: "龙",
+            badgeImg: "badge_dragon.png",
+            knowledge: "故宫最大的宫殿，是皇帝举行最重要仪式的地方，比如登基、结婚。屋顶上有10个神兽，代表最高等级！",
+            pose: '"我是皇帝"：双手叉腰，抬头挺胸，做出威风凛凛的样子。',
+            image: "tahe.jpg",
+            completed: false
+        },
+        {
+            id: 2,
+            name: "乾清宫 (皇帝寝宫)",
+            badgeName: "凤",
+            badgeImg: "badge_phoenix.png",
+            knowledge: '皇帝住的地方，也是处理日常政务的地方。殿内挂着"正大光明"的牌匾，是清朝皇帝选继承人的秘密。',
+            pose: '"正大光明"：一只手指向"正大光明"牌匾，另一只手竖起大拇指。',
+            image: "qianqing.jpg",
+            completed: false
+        },
+        {
+            id: 3,
+            name: "御花园 (皇家花园)",
+            badgeName: "狮",
+            badgeImg: "badge_lion.png",
+            knowledge: "皇帝和家人们散步、玩耍的花园。里面有很多奇形怪状的石头和古老的树木，像一个迷宫。",
+            pose: '"神兽守卫"：模仿御花园里的石狮子，做出威武的蹲坐姿势。',
+            image: "yuhuayuan.jpg",
+            completed: false
+        },
+        {
+            id: 4,
+            name: "九龙壁 (彩色巨龙)",
+            badgeName: "海马",
+            badgeImg: "badge_seahorse.png",
+            knowledge: "一面巨大的彩色墙壁，上面有九条活灵活现的龙。它们代表着皇帝的至高无上。数一数，是不是真的有九条龙？",
+            pose: '"飞龙在天"：双臂张开，像龙一样在空中飞翔。',
+            image: "jiulongbi.jpg",
+            completed: false
+        },
+        {
+            id: 5,
+            name: "角楼 (故宫的眼睛)",
+            badgeName: "斗牛",
+            badgeImg: "badge_bull.png",
+            knowledge: "故宫城墙的四个角上都有一个漂亮的角楼，像一座小小的仙宫。传说它有九梁十八柱七十二条脊。",
+            pose: '"瞭望远方"：一只手搭在额头上，做出向远方眺望的姿势。',
+            image: "jiaolou.jpg",
+            completed: false
+        }
+    ];
+
+    let currentCheckpointId = null;
+
+    // 页面切换函数
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        document.getElementById(pageId).classList.add('active');
+
+        if (pageId === 'list-page') {
+            renderCheckpointList();
+        }
+    }
+
+    // 更新进度条
+    function updateProgress() {
+        const completedCount = checkpoints.filter(cp => cp.completed).length;
+        const percentage = (completedCount / checkpoints.length) * 100;
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        progressFill.style.width = percentage + '%';
+        progressText.textContent = completedCount + '/5';
+    }
+
+    // 渲染打卡点列表
+    function renderCheckpointList() {
+        const list = document.getElementById('checkpoint-list');
+        list.innerHTML = '';
+        let completedCount = 0;
+
+        checkpoints.forEach(cp => {
+            const item = document.createElement('li');
+            item.className = 'checkpoint-item' + (cp.completed ? ' completed' : '');
+            item.setAttribute('data-id', cp.id);
+            item.onclick = () => showDetail(cp.id);
+
+            const statusText = cp.completed ? `✓ 已获得 ${cp.badgeName} 徽章` : '▶ 去打卡';
+
+            item.innerHTML = `
+                    <div class="item-info">
+                        <h3>${cp.id}. ${cp.name}</h3>
+                        <p>${cp.knowledge.substring(0, 25)}...</p>
+                    </div>
+                    <div class="item-status">${statusText}</div>
+                `;
+            list.appendChild(item);
+
+            if (cp.completed) {
+                completedCount++;
+            }
+        });
+
+        // 更新进度条
+        updateProgress();
+
+        // 检查是否完成所有打卡点
+        const rewardPrompt = document.getElementById('reward-prompt');
+        if (completedCount === checkpoints.length) {
+            rewardPrompt.style.display = 'block';
+        } else {
+            rewardPrompt.style.display = 'none';
+        }
+    }
+
+    // 显示打卡详情
+    function showDetail(id) {
+        const cp = checkpoints.find(c => c.id === id);
+        if (!cp) return;
+
+        currentCheckpointId = id;
+
+        document.getElementById('detail-title').textContent = cp.name;
+        document.getElementById('detail-image').src = cp.image;
+        document.getElementById('detail-knowledge').textContent = cp.knowledge;
+        document.getElementById('detail-pose').textContent = cp.pose;
+        document.getElementById('detail-badge-img').src = cp.badgeImg;
+        document.getElementById('detail-badge-name').textContent = cp.badgeName;
+
+        const checkInBtn = document.getElementById('check-in-btn');
+        if (cp.completed) {
+            checkInBtn.textContent = `✓ 已完成！你已获得 ${cp.badgeName} 徽章`;
+            checkInBtn.disabled = true;
+        } else {
+            checkInBtn.textContent = '我已合影，完成打卡！';
+            checkInBtn.disabled = false;
+        }
+
+        showPage('detail-page');
+    }
+
+    // 模拟完成打卡
+    function completeCheckpoint() {
+        if (currentCheckpointId === null) return;
+
+        const cp = checkpoints.find(c => c.id === currentCheckpointId);
+        if (cp && !cp.completed) {
+            cp.completed = true;
+            alert(`🎉 恭喜你！成功完成 ${cp.name} 的打卡任务，获得了 ${cp.badgeName} 徽章！\n\n线索提示：${getHint(cp.id)}`);
+            showPage('list-page'); // 返回列表页
+        }
+    }
+
+    // 获取线索提示
+    function getHint(id) {
+        const hints = {
+            1: "玉玺藏在中轴线上，它守护着最高的宝座。",
+            2: "玉玺在皇帝休息的地方，那里有秘密的盒子。",
+            3: "玉玺在花园的中心，被最古老的树看着。",
+            4: "玉玺在九条龙的旁边，它们面朝北方。",
+            5: "玉玺在故宫的角落，它能看到整个皇宫。"
+        };
+        return hints[id] || "";
+    }
+
+    // 重新开始游戏
+    function resetGame() {
+        checkpoints.forEach(cp => cp.completed = false);
+        showPage('home-page');
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        // 首次加载时，显示首页
+        showPage('home-page');
+        renderCheckpointList(); // 确保列表数据初始化
+    });
+</script>
+
+<body>
+    <div class="container">
+        <header>
+            🏯 故宫寻宝：神兽大作战 🏯
+        </header>
+        <main>
+            <!-- 1. 首页 -->
+            <section id="home-page" class="page active">
+                <h2>寻找失落的"九龙玉玺"</h2>
+                <div class="story-intro">
+                    <p>✨ <strong>小皇帝的九龙玉玺被淘气的神兽们藏起来啦！</strong></p>
+                    <p>勇敢的小朋友，你需要去故宫的五个重要地方，找到守护神兽，完成它们指定的任务（打卡合照），就能获得一枚神兽徽章和一条关于玉玺的线索。</p>
+                    <p>集齐所有徽章，拼出藏宝图，找到玉玺，你就是<strong>故宫小英雄！</strong>🎉</p>
+                </div>
+                <button class="start-button" onclick="showPage('list-page')">开始寻宝！</button>
+            </section>
+
+            <!-- 2. 打卡点列表页 -->
+            <section id="list-page" class="page">
+                <h2>神兽徽章收集进度</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%">
+                        <span id="progress-text">0/5</span>
+                    </div>
+                </div>
+                <ul class="checkpoint-list" id="checkpoint-list">
+                    <!-- 列表项将由JS动态生成 -->
+                </ul>
+                <div id="reward-prompt" style="text-align: center; margin-top: 20px; display: none;">
+                    <button class="start-button" onclick="showPage('reward-page')">领取终极奖励！</button>
+                </div>
+            </section>
+
+            <!-- 3. 打卡详情页 -->
+            <section id="detail-page" class="page">
+                <h2 id="detail-title"></h2>
+                <img id="detail-image" class="detail-image" src="" alt="景点图片">
+                <div class="detail-knowledge" id="detail-knowledge"></div>
+
+                <div class="pose-box">
+                    <h4>🎭 神兽任务：打卡Pose要求</h4>
+                    <p class="pose-text" id="detail-pose"></p>
+                    <div class="badge-info">
+                        <img id="detail-badge-img" src="" alt=" 神兽徽章">
+                <p>完成任务，即可获得 <strong id="detail-badge-name"></strong> 徽章！</p>
+    </div>
+    </div>
+
+    <button class="action-button check-in-button" id="check-in-btn" onclick="completeCheckpoint()">我已合影，完成打卡！</button>
+    <button class="action-button back-button" onclick="showPage('list-page')">返回列表</button>
+    </section>
+
+    <!-- 4. 终极奖励页 -->
+    <section id="reward-page" class="page">
+        <div class="trophy">🏆</div>
+        <h2>恭喜你，故宫小英雄！</h2>
+        <p style="font-size: 1.1em; margin-top: 15px;">你集齐了所有神兽徽章，成功拼出了藏宝图！</p>
+
+        <div class="certificate">
+            <h2>🎖️ 故宫小英雄证书 🎖️</h2>
+            <p>特此授予 <strong>勇敢的寻宝者</strong></p>
+            <p><strong>"故宫小英雄"</strong>称号！</p>
+            <p style="margin-top: 15px; font-size: 1em;">你成功完成了故宫定向越野挑战，获得了所有神兽的认可，并找回了失落的九龙玉玺！</p>
+            <img id="seal-image" class="seal-image" src="九龙玉玺.jpg" alt="九龙玉玺图片">
+            <p style="margin-top: 15px; color: #8B0000; font-weight: bold;">🎁 你已获得"故宫小英雄"的荣誉！</p>
+        </div>
+        <p style="margin-top: 20px; font-size: 1.05em;">希望你在故宫的寻宝之旅中，学到了很多有趣的知识！下次再来故宫时，别忘了这些神兽朋友哦！👋</p>
+        <button class="start-button" style="margin-top: 20px;" onclick="resetGame()">重新开始</button>
+    </section>
+    </main>
+    </div>
+
+
+</body>
+
+</html>
