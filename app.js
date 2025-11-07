@@ -339,12 +339,12 @@ function renderCheckpointMap() {
     });
     const statusText = cp.completed ? `✓ 已获得 ${cp.badgeName} 徽章` : '▶ 去打卡';
     const popupHtml = `
-                <div style="min-width:200px;max-width:280px;">
-                    <img src="${cp.image}" alt="缩略图" style="width:100%;height:auto;max-height:180px;object-fit:contain;border-radius:8px;margin-bottom:6px;" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}'" />
-                    <div style=\"font-weight:bold;color:#8B0000;margin-bottom:6px;\">${cp.id}. ${cp.name}</div>
-                    <div style=\"color:#666;margin-bottom:8px;\">${cp.knowledge.substring(0, 28)}...</div>
-                    <button style=\"background:#FFD700;color:#8B0000;border:none;border-radius:16px;padding:6px 10px;font-weight:bold;cursor:pointer;width:100%;\" onclick=\"showDetail(${cp.id})\">${statusText}</button>
-                    </div>
+                <div style="min-width:200px;max-width:280px;padding:12px;box-sizing:border-box;">
+                    <img src="${cp.image}" alt="缩略图" style="width:100%;height:auto;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:8px;display:block;" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}'" />
+                    <div style="font-weight:bold;color:#8B0000;margin-bottom:6px;font-size:16px;">${cp.id}. ${cp.name}</div>
+                    <div style="color:#666;margin-bottom:10px;font-size:14px;line-height:1.5;">${cp.knowledge.substring(0, 28)}...</div>
+                    <button style="background:#FFD700;color:#8B0000;border:none;border-radius:16px;padding:8px 12px;font-weight:bold;cursor:pointer;width:100%;font-size:14px;box-sizing:border-box;" onclick="showDetail(${cp.id})">${statusText}</button>
+                </div>
             `;
     marker.bindPopup(popupHtml, {
       maxWidth: 280,
