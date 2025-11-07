@@ -16,16 +16,60 @@ p { line-height: 1.8; margin-bottom: 10px; font-size: 1em; }
 .start-button:active { transform: scale(0.95); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
 
 /* 列表页样式 */
-.progress-bar { width: 100%; height: 30px; background-color: #e0e0e0; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #3CB371 0%, #2E8B57 100%); transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9em; }
+.progress-bar { 
+  width: 100%; 
+  height: 36px; 
+  background: linear-gradient(135deg, #F5F5F5 0%, #E8E8E8 100%); 
+  border-radius: 18px; 
+  overflow: hidden; 
+  margin-bottom: 20px; 
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.05); 
+  position: relative;
+  border: 1px solid #D0D0D0;
+}
+.progress-fill { 
+  height: 100%; 
+  background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%); 
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #8B0000;
+  font-weight: 700;
+  font-size: 0.95em;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  z-index: 2;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}
 .map-view { width: 100%; height: 420px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
 
 /* 详情页样式 */
-.detail-image { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+.detail-image { width: 100%; height: auto; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 .detail-knowledge { background-color: #F5F5F5; padding: 15px; border-radius: 8px; margin-bottom: 15px; line-height: 1.8; font-size: 1em; }
-.pose-box { background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%); border: 2px dashed #FFD700; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.pose-box h4 { color: #8B0000; margin-top: 0; margin-bottom: 10px; font-size: 1.1em; }
-.pose-text { font-size: 1.05em; line-height: 1.6; color: #333; }
+.pose-requirement {
+  background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%);
+  border: 2px dashed #FFD700;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.pose-label {
+  color: #8B0000;
+  font-weight: bold;
+  font-size: 0.95em;
+  margin-bottom: 8px;
+}
+.pose-text {
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #333;
+  margin: 0;
+}
 .action-button { display: block; width: 100%; padding: 16px; text-align: center; font-size: 1.1em; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: all 0.3s; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 .check-in-button { background: linear-gradient(135deg, #3CB371 0%, #2E8B57 100%); color: white; }
 .check-in-button:active { transform: scale(0.98); }
@@ -73,24 +117,458 @@ p { line-height: 1.8; margin-bottom: 10px; font-size: 1em; }
 .badge-item img { width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
 .badge-item span { margin-top: 6px; font-size: 0.85em; color: #8B0000; font-weight: bold; }
 .badge-locked img { filter: grayscale(100%) opacity(0.5); }
-.badge-scroll { display: inline-flex; gap: 10px; align-items: stretch; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; scroll-snap-type: x proximity; }
-.badge-scroll .badge-item { min-width: 84px; scroll-snap-align: start; }
+.badge-scroll { 
+  display: inline-flex; 
+  gap: 10px; 
+  align-items: stretch; 
+  width: 100%; 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch; 
+  padding: 6px 15px 6px 15px; 
+  scroll-snap-type: x proximity; 
+  box-sizing: border-box;
+}
+.badge-scroll .badge-item { 
+  min-width: 84px; 
+  scroll-snap-align: start; 
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+.badge-highlight { 
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #FFFACD 0%, #FFE4B5 100%) !important;
+  border: 2px solid #FFD700;
+  animation: badgePulse 1.5s ease-in-out infinite;
+  z-index: 10;
+  position: relative;
+  transform-origin: center center;
+}
+@keyframes badgePulse {
+  0%, 100% { 
+    transform: scale(1.1); 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.3); 
+  }
+  50% { 
+    transform: scale(1.12); 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 6px 16px rgba(0, 0, 0, 0.4); 
+  }
+}
 
 /* 获得徽章弹出动画 */
 .badge-earned-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); z-index: 10000; }
-.badge-earned-card { background: #FFFDF5; border: 3px solid #FFD700; border-radius: 14px; padding: 18px 16px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.25); transform: scale(0.6); opacity: 0; animation: popIn 600ms ease forwards; }
+.badge-earned-card { background: #FFFDF5; border: 3px solid #FFD700; border-radius: 14px; padding: 18px 16px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.25); transform: scale(0.6); opacity: 0; animation: popIn 600ms ease forwards; max-width: 320px; width: 90%; }
 .badge-earned-card img { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); }
 .badge-earned-card h4 { margin: 10px 0 0 0; color: #8B0000; }
-.badge-earned-hint { margin-top: 8px; color: #333; font-size: 0.95em; }
+.badge-earned-story { margin-top: 10px; color: #555; font-size: 0.9em; line-height: 1.6; padding: 8px 12px; background: rgba(255, 248, 220, 0.5); border-radius: 6px; text-align: left; max-height: 120px; overflow-y: auto; }
+.badge-earned-story::-webkit-scrollbar { width: 4px; }
+.badge-earned-story::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+.badge-earned-hint { margin-top: 8px; color: #8B0000; font-size: 0.95em; font-weight: bold; }
+.badge-earned-tip { margin-top: 12px; color: #999; font-size: 0.85em; font-style: italic; cursor: pointer; }
+.badge-earned-card { cursor: pointer; }
 @keyframes popIn { 0%{ transform: scale(0.6); opacity:0;} 60%{ transform: scale(1.08); opacity:1;} 100%{ transform: scale(1); opacity:1;} }
 
 /* 任务区域 */
 .task-box { background: #FFFFFF; border: 2px solid #FFD700; border-radius: 10px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 12px; }
-.photo-row { display: flex; gap: 12px; align-items: center; }
-.photo-preview { width: 110px; height: 78px; border-radius: 8px; object-fit: cover; background: #f2f2f2; }
-.quiz-image { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
-.quiz-options { list-style: none; padding: 0; margin: 8px 0 0 0; }
-.quiz-options li { margin-bottom: 8px; }
-.quiz-hint { color: #8B0000; font-size: 0.92em; margin-top: 6px; }
+.task-title { color: #8B0000; margin: 0 0 8px 0; font-size: 1em; }
+.photo-upload-area {
+  position: relative;
+  width: 100%;
+  min-height: 100px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.photo-upload-area input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.photo-upload-content {
+  position: relative;
+  width: 100%;
+  min-height: 100px;
+  /* border: 2.5px dashed #FFD700; */
+  border-radius: 12px;
+  /* background: linear-gradient(135deg, #FFFDF5 0%, #FFF8DC 100%); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+.photo-upload-area:hover .photo-upload-content {
+  border-color: #FFA500;
+  background: linear-gradient(135deg, #FFF8DC 0%, #FFE4B5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+.photo-upload-area:active .photo-upload-content {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.2);
+}
+.photo-preview {
+  width: 100%;
+  height: auto;
+  max-height: 350px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #f8f8f8;
+  display: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.photo-preview.has-image {
+  display: block;
+  padding: 8px;
+}
+.photo-upload-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 20px;
+  color: #666;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.photo-upload-hint.hidden {
+  display: none;
+}
+.photo-upload-icon {
+  font-size: 56px;
+  opacity: 0.7;
+  animation: pulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+.photo-upload-text {
+  font-size: 15px;
+  color: #8B0000;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.3px;
+}
+.photo-upload-subtext {
+  font-size: 12px;
+  color: #999;
+  margin-top: -4px;
+  font-weight: 400;
+}
+.quiz-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-question {
+  font-weight: 600;
+  color: #8B0000;
+  margin-bottom: 14px;
+  font-size: 1.05em;
+  line-height: 1.6;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%);
+  border-radius: 10px;
+  border-left: 4px solid #FFD700;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.2);
+}
+
+.quiz-options {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quiz-options li {
+  margin: 0;
+  padding: 0;
+}
+
+.quiz-options label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  border: 2px solid #E0E0E0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.quiz-options label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%);
+  transition: width 0.3s ease;
+  z-index: 0;
+}
+
+.quiz-options label:hover {
+  border-color: #FFD700;
+  background: #FFFDF5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+}
+
+.quiz-options label:hover::before {
+  width: 4px;
+}
+
+.quiz-options label:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.15);
+}
+
+.quiz-options input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #FFD700;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.quiz-options input[type="radio"]:checked + span {
+  color: #8B0000;
+  font-weight: 600;
+}
+
+.quiz-options label:has(input[type="radio"]:checked) {
+  border-color: #FFD700;
+  background: linear-gradient(135deg, #FFFACD 0%, #FFFFE0 100%);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
+
+.quiz-options label:has(input[type="radio"]:checked)::before {
+  width: 4px;
+  background: #FFD700;
+}
+
+.quiz-options span {
+  flex: 1;
+  color: #333;
+  font-size: 0.95em;
+  line-height: 1.5;
+  transition: color 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.quiz-hint {
+  color: #8B0000;
+  font-size: 0.9em;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 250, 205, 0.5);
+  border-radius: 8px;
+  border-left: 3px solid #FFD700;
+  line-height: 1.5;
+}
+
+.quiz-feedback {
+  color: #DC143C;
+  font-weight: 600;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(220, 20, 60, 0.1);
+  border-radius: 8px;
+  border-left: 4px solid #DC143C;
+  animation: shake 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95em;
+}
+
+.quiz-feedback::before {
+  content: "💡";
+  font-size: 1.2em;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Leaflet 弹窗样式优化 */
+.leaflet-container {
+  overflow: hidden;
+  position: relative;
+}
+#map {
+  position: relative;
+  overflow: hidden;
+}
+/* 自定义弹窗样式 */
+.custom-popup .leaflet-popup-content-wrapper {
+  min-width: 200px;
+  width: 280px;
+  max-width: 280px;
+  max-height: 400px;
+  overflow: visible;
+  border-radius: 8px;
+  box-sizing: border-box;
+  position: relative;
+  padding: 0;
+}
+.custom-popup .leaflet-popup-content {
+  margin: 8px 12px;
+  padding: 0;
+  line-height: 1.4;
+  width: auto;
+  max-width: 100%;
+  word-wrap: break-word;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 384px;
+}
+.custom-popup .leaflet-popup-tip {
+  width: 17px;
+  height: 17px;
+}
+.custom-popup .leaflet-popup-close-button {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: center !important;
+  line-height: 30px !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  color: #333 !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  z-index: 1000 !important;
+  text-decoration: none !important;
+  display: block !important;
+}
+.custom-popup .leaflet-popup-close-button:hover {
+  color: #000 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-radius: 0 8px 0 0 !important;
+}
+.custom-popup .leaflet-popup-content::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+/* 确保弹窗不会超出地图容器 */
+.leaflet-container .leaflet-popup {
+  max-width: calc(100% - 60px) !important;
+  max-height: calc(100% - 60px) !important;
+}
+.leaflet-popup-pane {
+  z-index: 400;
+}
+/* 确保 popup 容器结构正确 */
+.custom-popup {
+  position: relative;
+}
+.custom-popup .leaflet-popup-content-wrapper {
+  position: relative;
+  padding-top: 0;
+}
+/* 确保关闭按钮在右上角 */
+.custom-popup .leaflet-popup-close-button {
+  right: 0 !important;
+  left: auto !important;
+  top: 0 !important;
+  bottom: auto !important;
+  direction: ltr !important;
+  float: none !important;
+}
+/* 确保 tip 正确显示 */
+.custom-popup .leaflet-popup-tip-container {
+  margin: 0 auto;
+  width: 40px;
+  height: 20px;
+  position: relative;
+  overflow: visible;
+}
+.custom-popup .leaflet-popup-tip {
+  width: 17px;
+  height: 17px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* 地图操作按钮 */
+.map-actions { display: flex; gap: 10px; margin-bottom: 12px; justify-content: space-between; align-items: center; }
+.map-action-btn { 
+  display: inline-block;
+  background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+  color: #8B0000;
+  padding: 10px 16px;
+  font-size: 1em;
+  margin: 0;
+  border-radius: 50px;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+  border: 2px solid #8B0000;
+  cursor: pointer;
+}
+.map-action-btn:hover { background: linear-gradient(135deg, #FFC700 0%, #FFB700 100%); }
+.map-action-btn:active { transform: scale(0.95); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+
+/* 徽章条 */
+.badge-strip { margin: 12px 0 0 0; }
+
+/* 奖励页样式 */
+.reward-intro { font-size: 1.1em; margin-top: 15px; }
+.reward-outro { margin-top: 20px; font-size: 1.05em; }
+.reward-prompt { text-align: center; margin-top: 20px; display: none; }
+.certificate-desc { margin-top: 15px; font-size: 1em; }
+.certificate-footer { margin-top: 15px; color: #8B0000; font-weight: bold; }
+.reset-btn { margin-top: 20px; }
 
 

@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 </head>
-<script src="app.js"></script>
 <body>
     <div class="container">
         <header>
@@ -24,12 +23,7 @@
                         <img class="home-hero" src="img/tahe.jpg" alt="故宫太和殿">
                 <div class="story-intro">
                     <p>✨ <strong>小皇帝的九龙玉玺被淘气的神兽们藏起来啦！</strong></p>
-                    <p>勇敢的小朋友，你需要去故宫的五个重要地方，找到守护神兽，完成它们指定的任务（打卡合照），就能获得一枚神兽徽章和一条关于玉玺的线索。</p>
-                    <p>集齐所有徽章，拼出藏宝图，找到玉玺，你就是<strong>故宫小英雄！</strong>🎉</p>
-                </div>
-                <div class="badge-collection">
-                    <h3>我的徽章</h3>
-                    <div id="badge-grid" class="badge-scroll"></div>
+                    <p>勇敢的小朋友，你需要去故宫的一些重要地方，找到守护神兽，完成它们指定的任务，就能获得一枚神兽徽章。集齐所有徽章，拼出藏宝图，找到玉玺，你就是<strong>故宫小英雄！</strong>🎉</p>
                 </div>
                 <button class="start-button" onclick="showPage('list-page')">开始寻宝！</button>
             </section>
@@ -38,28 +32,22 @@
             <section id="list-page" class="page">
                 <h2>神兽徽章收集进度</h2>
                 <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%">
-                        <span id="progress-text">0/5</span>
-                    </div>
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    <span id="progress-text" class="progress-text">0/5</span>
                 </div>
-                <div class="map-actions"
-                    style="display:flex; gap:10px; margin-bottom:12px; justify-content:space-between; align-items:center;">
+                <div class="map-actions">
                     <div>
-                        <button class="start-button" style="padding:10px 16px; font-size:1em; margin:0;"
-                            onclick="resetToCheckpoints()">🗺️ 回到打卡区域</button>
+                        <button class="map-action-btn" onclick="resetToCheckpoints()">🗺️ 回到打卡区域</button>
                     </div>
                     <div>
-                        <button class="start-button" style="padding:10px 16px; font-size:1em; margin:0;"
-                            onclick="locateMe()">📍 定位到我</button>
+                        <button class="map-action-btn" onclick="locateMe()">📍 定位到我</button>
                     </div>
                 </div>
-                <div id="map"
-                    style="width:100%; height: 420px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-                </div>
-                <div class="badge-strip" style="margin: 12px 0 0 0;">
+                <div id="map" class="map-view"></div>
+                <div class="badge-strip">
                     <div id="list-badge-grid" class="badge-scroll"></div>
                 </div>
-                <div id="reward-prompt" style="text-align: center; margin-top: 20px; display: none;">
+                <div id="reward-prompt" class="reward-prompt">
                     <button class="start-button" onclick="showPage('reward-page')">领取终极奖励！</button>
                 </div>
             </section>
@@ -70,26 +58,27 @@
                 <img id="detail-image" class="detail-image" src="" alt="景点图片">
                 <div class="detail-knowledge" id="detail-knowledge"></div>
 
-                <div class="pose-box">
-                    <h4>🎭 神兽任务：打卡Pose要求</h4>
-                    <p class="pose-text" id="detail-pose"></p>
-                </div>
-
                 <div class="task-box">
-                    <h4 style="color:#8B0000;margin:0 0 8px 0;">📷 上传合照</h4>
-                    <div class="photo-row">
-                        <img id="photo-preview" class="photo-preview" src="" alt="预览">
+                    <h4 class="task-title">📷 <span class="pose-text" id="detail-pose"></span></h4>
+                    <div class="photo-upload-area" id="photo-upload-area">
                         <input id="photo-input" type="file" accept="image/*" capture="environment">
+                        <div class="photo-upload-content">
+                            <img id="photo-preview" class="photo-preview" src="" alt="预览">
+                            <div class="photo-upload-hint" id="photo-upload-hint">
+                                <div class="photo-upload-icon">📷</div>
+                                <div class="photo-upload-text"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="task-box">
-                    <h4 style="color:#8B0000;margin:0 0 8px 0;">❓ 回答小问答</h4>
+                    <h4 class="task-title">❓ 回答小问题</h4>
                     <img id="quiz-image" class="quiz-image" src="" alt="问题配图" style="display:none;">
-                    <div id="quiz-question" style="font-weight:bold; color:#333; margin-bottom:6px;"></div>
+                    <div id="quiz-question" class="quiz-question"></div>
                     <ul id="quiz-options" class="quiz-options"></ul>
                     <div id="quiz-hint" class="quiz-hint"></div>
-                    <div id="quiz-feedback" style="color:#DC143C; font-weight:bold; margin-top:6px;"></div>
+                    <div id="quiz-feedback" class="quiz-feedback"></div>
                 </div>
 
                 <button class="action-button check-in-button" id="check-in-btn"
@@ -101,18 +90,18 @@
             <section id="reward-page" class="page">
                 <div class="trophy">🏆</div>
                 <h2>恭喜你，故宫小英雄！</h2>
-                <p style="font-size: 1.1em; margin-top: 15px;">你集齐了所有神兽徽章，成功拼出了藏宝图！</p>
+                <p class="reward-intro">你集齐了所有神兽徽章，成功拼出了藏宝图！</p>
 
                 <div class="certificate">
                     <h2>🎖️ 故宫小英雄证书 🎖️</h2>
                     <p>特此授予 <strong>勇敢的寻宝者</strong></p>
                     <p><strong>"故宫小英雄"</strong>称号！</p>
-                    <p style="margin-top: 15px; font-size: 1em;">你成功完成了故宫定向越野挑战，获得了所有神兽的认可，并找回了失落的九龙玉玺！</p>
-                        <img id="seal-image" class="seal-image" src="img/九龙玉玺.jpg" alt="九龙玉玺图片">
-                    <p style="margin-top: 15px; color: #8B0000; font-weight: bold;">🎁 你已获得"故宫小英雄"的荣誉！</p>
+                    <p class="certificate-desc">你成功完成了故宫定向越野挑战，获得了所有神兽的认可，并找回了失落的九龙玉玺！</p>
+                    <img id="seal-image" class="seal-image" src="img/九龙玉玺.jpg" alt="九龙玉玺图片">
+                    <p class="certificate-footer">🎁 你已获得"故宫小英雄"的荣誉！</p>
                 </div>
-                <p style="margin-top: 20px; font-size: 1.05em;">希望你在故宫的寻宝之旅中，学到了很多有趣的知识！下次再来故宫时，别忘了这些神兽朋友哦！👋</p>
-                <button class="start-button" style="margin-top: 20px;" onclick="resetGame()">重新开始</button>
+                <p class="reward-outro">希望你在故宫的寻宝之旅中，学到了很多有趣的知识！下次再来故宫时，别忘了这些神兽朋友哦！👋</p>
+                <button class="start-button reset-btn" onclick="resetGame()">重新开始</button>
             </section>
         </main>
     </div>
@@ -121,6 +110,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
