@@ -114,7 +114,7 @@ async function buildCheckpointsFromQuizzes(quizzes) {
     return {
       id: q.id,
       name: lm.name,
-      badgeName: badge.name,
+      badgeName: lm.animal,
       badgeImg: badge.img,
       knowledge: lm.details,
       pose: lm.pose,

@@ -113,20 +113,54 @@ p { line-height: 1.8; margin-bottom: 10px; font-size: 1em; }
 .badge-collection { margin-top: 16px; padding: 14px; border: 2px solid #FFD700; border-radius: 12px; background: #FFFBEA; }
 .badge-collection h3 { margin: 0 0 10px 0; color: #8B0000; font-size: 1.15em; text-align: left; }
 .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: center; }
-.badge-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border-radius: 10px; padding: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.badge-item { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  background: #FFFFFF; 
+  border-radius: 10px; 
+  padding: 10px; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  transition: all 0.3s ease;
+}
+.badge-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.1);
+  border-color: rgba(255, 215, 0, 0.6);
+}
 .badge-item img { width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
 .badge-item span { margin-top: 6px; font-size: 0.85em; color: #8B0000; font-weight: bold; }
 .badge-locked img { filter: grayscale(100%) opacity(0.5); }
 .badge-scroll { 
   display: inline-flex; 
-  gap: 10px; 
+  gap: 12px; 
   align-items: stretch; 
   width: 100%; 
   overflow-x: auto; 
   -webkit-overflow-scrolling: touch; 
-  padding: 6px 15px 6px 15px; 
+  padding: 8px 8px 8px 8px; 
   scroll-snap-type: x proximity; 
   box-sizing: border-box;
+  /* 自定义滚动条样式 */
+  scrollbar-width: thin;
+  scrollbar-color: #FFD700 #FFFACD;
+}
+.badge-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+.badge-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 4px;
+}
+.badge-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border-radius: 4px;
+  border: 1px solid #8B0000;
+}
+.badge-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
 }
 .badge-scroll .badge-item { 
   min-width: 84px; 
@@ -727,7 +761,25 @@ p { line-height: 1.8; margin-bottom: 10px; font-size: 1em; }
 .map-action-btn:active { transform: scale(0.95); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
 
 /* 徽章条 */
-.badge-strip { margin: 12px 0 0 0; }
+.badge-strip { 
+  margin: 16px 0 0 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #FFFACD 0%, #FFE4B5 100%);
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+}
+.badge-strip::before {
+  content: '🏆 我的徽章墙';
+  display: block;
+  font-size: 16px;
+  font-weight: bold;
+  color: #8B0000;
+  margin-bottom: 12px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
 
 /* 奖励页样式 */
 .reward-intro { font-size: 1.1em; margin-top: 15px; }
