@@ -696,4 +696,195 @@ p { line-height: 1.8; margin-bottom: 10px; font-size: 1em; }
 .certificate-footer { margin-top: 15px; color: #8B0000; font-weight: bold; }
 .reset-btn { margin-top: 20px; }
 
+/* Edit Page Styles */
+#edit-page {
+    padding: 20px;
+}
+
+.edit-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: calc(100vh - 250px);
+    min-height: 500px;
+}
+
+.edit-map-container {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+}
+
+.edit-search-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    display: flex;
+    gap: 5px;
+    background: white;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border: 2px solid #d4a574;
+}
+
+.edit-search-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #d4a574;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    min-width: 200px;
+}
+
+.edit-search-input:focus {
+    border-color: #ffa500;
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.3);
+}
+
+.edit-search-btn {
+    padding: 8px 15px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+    color: #8B0000;
+    border: 2px solid #8B0000;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.edit-search-btn:hover {
+    background: linear-gradient(135deg, #FFC700 0%, #FFB700 100%);
+    transform: scale(1.05);
+}
+
+.edit-search-btn:active {
+    transform: scale(0.95);
+}
+
+#edit-map {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    border: 2px solid #d4a574;
+}
+
+.edit-list-container {
+    width: 100%;
+    max-height: 300px;
+    background: #f9f5e8;
+    border-radius: 8px;
+    padding: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 2px solid #d4a574;
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-list-container h3 {
+    margin: 0 0 15px 0;
+    color: #8b4513;
+    font-size: 18px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #d4a574;
+    flex-shrink: 0;
+}
+
+.edit-landmark-list {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+}
+
+/* Custom scrollbar for edit-landmark-list */
+.edit-landmark-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.edit-landmark-list::-webkit-scrollbar-track {
+    background: #f1e8d0;
+    border-radius: 4px;
+}
+
+.edit-landmark-list::-webkit-scrollbar-thumb {
+    background: #d4a574;
+    border-radius: 4px;
+}
+
+.edit-landmark-list::-webkit-scrollbar-thumb:hover {
+    background: #c4965f;
+}
+
+.edit-landmark-item {
+    background: white;
+    border: 2px solid #d4a574;
+    border-radius: 6px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    min-width: 120px;
+    text-align: center;
+}
+
+.edit-landmark-item:hover {
+    background: #fff8e1;
+    border-color: #ffa500;
+    transform: translateX(5px);
+}
+
+.edit-landmark-item.selected {
+    background: #ffd700;
+    border-color: #ff8c00;
+    box-shadow: 0 2px 8px rgba(255, 140, 0, 0.4);
+}
+
+.edit-landmark-item .landmark-name {
+    font-weight: bold;
+    color: #8b4513;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.edit-landmark-item .landmark-coords {
+    font-size: 12px;
+    color: #666;
+    font-family: monospace;
+}
+
+.edit-status {
+    margin-top: 15px;
+    padding: 10px;
+    background: #e8f5e9;
+    border: 2px solid #4caf50;
+    border-radius: 6px;
+    color: #2e7d32;
+    font-size: 14px;
+    display: none;
+}
+
+.edit-status.show {
+    display: block;
+}
+
+.edit-status.error {
+    background: #ffebee;
+    border-color: #f44336;
+    color: #c62828;
+}
 

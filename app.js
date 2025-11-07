@@ -42,253 +42,40 @@ const PLACEHOLDER_IMG = `data:image/svg+xml;utf8,${encodeURIComponent(`
           fill="#999" font-size="20">No Image</text>
   </svg>
 `)}`
-// 基于题库生成一一对应的打卡点（使用更贴近题干的真实命名与近似坐标）
-function buildCheckpointsFromQuizzes(quizzes) {
+// 地标数据（从JSON文件加载）
+let landmarks30 = null;
 
-  // 30 个地标（名称 + 近似坐标）
-  const landmarks30 = [
-    {
-      "name": "午门",
-      "lat": 39.91352,
-      "lng": 116.39714,
-      "image": "img/wumen.jpg",
-      "details": "午门是故宫的正门，好像皇帝的“欢迎大门”。很多游客从这里进去，象征着进入皇宫的神秘世界。",
-      "pose": "站在门前，双手举成‘V’形，笑着仰望城楼，像是要进入皇宫的勇士！"
-    },
-    {
-      "name": "太和门",
-      "lat": 39.91483,
-      "lng": 116.39715,
-      "image": "img/taihemen.jpg",
-      "details": "太和门连接外朝和内廷，是个重要的过渡门，好像从“开会大厅”进入“家庭区域”的门。",
-      "pose": "双手自然下垂，身体微微前倾，摆出‘请进’的姿势，像小小宫门守卫！"
-    },
-    {
-      "name": "太和殿",
-      "lat": 39.91634,
-      "lng": 116.39716,
-      "image": "img/taihedian.jpg",
-      "details": "太和殿是举行大典的地方，皇帝在这里站在最高处，好像整个中国的“舞台中心”。",
-      "pose": "双手叉腰、抬头挺胸，摆出‘我是小皇帝’的气势姿势！"
-    },
-    {
-      "name": "中和殿",
-      "lat": 39.91699,
-      "lng": 116.39714,
-      "image": "img/zhonghedian.jpg",
-      "details": "中和殿有点像皇帝稍作休息或准备的地方，是“太和殿”的小助手。",
-      "pose": "双手合十放胸前，闭眼微笑，像在冥想一样‘保持平衡与中和’。"
-    },
-    {
-      "name": "保和殿",
-      "lat": 39.91767,
-      "lng": 116.39715,
-      "image": "img/baohedian.jpg",
-      "details": "保和殿用来考取功名和举行宴会，皇帝和大臣们在这里“开派对＋考试”。",
-      "pose": "举起一本书或手比‘OK’，做出‘考试顺利’的姿势！"
-    },
-    {
-      "name": "乾清宫",
-      "lat": 39.91741,
-      "lng": 116.39727,
-      "image": "img/qianqinggong.jpg",
-      "details": "乾清宫是皇帝的寝宫，就像皇帝的“家”一样，安静、尊贵。",
-      "pose": "一手叉腰，一手做‘请进’动作，像主人邀请客人来家里玩。"
-    },
-    {
-      "name": "交泰殿",
-      "lat": 39.9179,
-      "lng": 116.39725,
-      "image": "img/jiaotaidian.jpg",
-      "details": "交泰殿象征“天人交泰、皇室和谐”，就像皇帝和皇后相处的地方。",
-      "pose": "和朋友面对面比心，代表‘和谐美满’！"
-    },
-    {
-      "name": "坤宁宫",
-      "lat": 39.91838,
-      "lng": 116.39723,
-      "image": "img/kunninggong.jpg",
-      "details": "坤宁宫是皇后的寝宫，好像“皇后专属的房间”，美丽又庄重。",
-      "pose": "一手提‘想象中的裙摆’，另一手轻轻比心，做个优雅‘小皇后’造型。"
-    },
-    {
-      "name": "御花园",
-      "lat": 39.91895,
-      "lng": 116.3972,
-      "image": "img/yuhuayuan.jpg",
-      "details": "御花园是皇宫里的花园，有花、有树、有池塘，是皇帝和皇后散步聊天的地方，像个秘密花园。",
-      "pose": "张开双臂转圈，或者蹲下闻花香，露出自然微笑～"
-    },
-    {
-      "name": "神武门",
-      "lat": 39.9204,
-      "lng": 116.39732,
-      "image": "img/shenwumen.jpg",
-      "details": "神武门是故宫的北门，好像皇宫的“后门”，象征结束了参观，走出历史的旅程。",
-      "pose": "背对大门回头笑，做个‘告别皇宫’的俏皮姿势。"
-    },
-    {
-      "name": "九龙壁",
-      "lat": 39.91943,
-      "lng": 116.39705,
-      "image": "img/jiulongbi.jpg",
-      "details": "九龙壁上雕刻着九条龙，好像皇帝的“专属龙队伍”，非常霸气。",
-      "pose": "双手做出‘龙爪’动作，模仿喷火的表情，霸气登场！"
-    },
-    {
-      "name": "文华殿",
-      "lat": 39.91538,
-      "lng": 116.40148,
-      "image": "img/wenhuadian.jpg",
-      "details": "文华殿是读书和写诗的地方，就像皇帝的“文艺沙龙”，充满书香气。",
-      "pose": "拿出笔或假装写诗，皱眉沉思的‘小诗人’姿势！"
-    },
-    {
-      "name": "武英殿",
-      "lat": 39.91546,
-      "lng": 116.39283,
-      "image": "img/wuyingdian.jpg",
-      "details": "武英殿保存着很多古书，被称为“皇家的图书馆”，知识满满。",
-      "pose": "双手托腮，看向远方，像在思考‘今天读哪本书好呢？’"
-    },
-    {
-      "name": "养心殿",
-      "lat": 39.91699,
-      "lng": 116.3956,
-      "image": "img/yangxindian.jpg",
-      "details": "养心殿是皇帝晚年办公和生活的地方，好像皇帝的“办公室＋休息室”。",
-      "pose": "手拿扇子，假装在批阅奏折，摆出‘认真办公’的模样。"
-    },
-    {
-      "name": "寿安宫",
-      "lat": 39.9179,
-      "lng": 116.39555,
-      "image": "img/shouangong.jpg",
-      "details": "寿安宫是太后居住的地方，好像皇家的“奶奶房间”，悠闲而庄重。",
-      "pose": "双手合十放胸前，微笑祈福‘祝大家都平安长寿’。"
-    },
-    {
-      "name": "景仁宫",
-      "lat": 39.91845,
-      "lng": 116.3955,
-      "image": "img/jingrengong.jpg",
-      "details": "景仁宫是皇子妃们生活的地方，好像皇室大家庭里孩子们的“别墅区”。",
-      "pose": "三五好友一起比心或拉手，像闺蜜合照一样温馨。"
-    },
-    {
-      "name": "承乾宫",
-      "lat": 39.91845,
-      "lng": 116.39895,
-      "image": "img/chengqiangong.jpg",
-      "details": "承乾宫曾是皇子们朗读经典的地方，是未来帝王练习的“学堂”。",
-      "pose": "拿出一本书或假装朗读，举手示意‘老师我会！’"
-    },
-    {
-      "name": "钟粹宫",
-      "lat": 39.91793,
-      "lng": 116.39905,
-      "image": "img/zhongcuigong.jpg",
-      "details": "钟粹宫是后宫的一部分，好像皇后的“闺房”，安静、典雅。",
-      "pose": "双手托脸、甜甜微笑，做个‘温柔可爱’的公主姿势。"
-    },
-    {
-      "name": "景阳宫",
-      "lat": 39.91736,
-      "lng": 116.39912,
-      "image": "img/jingyanggong.jpg",
-      "details": "景阳宫原来是皇后和妃子的寝宫之一，像个“姐妹们的房间集群”。",
-      "pose": "和朋友并肩靠头笑，像姐妹间的秘密合照。"
-    },
-    {
-      "name": "翊坤宫",
-      "lat": 39.91685,
-      "lng": 116.39545,
-      "image": "img/yikungong.jpg",
-      "details": "翊坤宫名字里的‘坤’代表“地”，意为皇后辅佐国家，好像“国家背后的女人”。",
-      "pose": "一手比心、一手握拳，代表‘温柔又有力量’。"
-    },
-    {
-      "name": "储秀宫",
-      "lat": 39.9163,
-      "lng": 116.3954,
-      "image": "img/chuxiugong.jpg",
-      "details": "储秀宫是培养宫中女子学习礼仪的地方，就像“小公主学校”。",
-      "pose": "摆出‘优雅行礼’的动作，抬下巴、微笑。"
-    },
-    {
-      "name": "咸福宫",
-      "lat": 39.91578,
-      "lng": 116.39533,
-      "image": "img/xianfugong.jpg",
-      "details": "咸福宫名字里“咸福”表示“共有的福气”，在这里住的妃子希望福气一起分享。",
-      "pose": "双手举高比心，对着镜头喊‘一起幸福！’"
-    },
-    {
-      "name": "永寿宫",
-      "lat": 39.91635,
-      "lng": 116.3991,
-      "image": "img/yongshougong.jpeg",
-      "details": "永寿宫名字里的“永寿”意味着“永远长寿”，是希望皇室代代安康的寓意。",
-      "pose": "双手比‘寿’字形状或双手抱拳，微笑祝福大家健康长寿。"
-    },
-    {
-      "name": "长春宫",
-      "lat": 39.9169,
-      "lng": 116.39898,
-      "image": "img/changchungong.jpg",
-      "details": "长春宫名字里“长春”意为“长久春天”，好像皇家的“青春常在”房间。",
-      "pose": "跳起或伸手指向天空，摆出‘青春活力’的姿势！"
-    },
-    {
-      "name": "启祥宫",
-      "lat": 39.9158,
-      "lng": 116.399,
-      "image": "img/qixianggong.jpg",
-      "details": "启祥宫的“启祥”含义是“开启祥瑞”，像个“好运起点”的房间。",
-      "pose": "手指向前方，做出‘出发好运！’的表情与动作。"
-    },
-    {
-      "name": "慈宁宫",
-      "lat": 39.91955,
-      "lng": 116.3923,
-      "image": "img/cininggong.jpg",
-      "details": "慈宁宫是太后住的地方，“慈宁”意味着慈爱与安宁，像皇室的“养老院”。",
-      "pose": "双手抱肩，温柔地笑，摆出‘慈祥奶奶’的表情。"
-    },
-    {
-      "name": "隆宗门",
-      "lat": 39.91905,
-      "lng": 116.3946,
-      "image": "img/longzongmen.jpg",
-      "details": "隆宗门是通往皇室后院的门，好像“皇家的内门”，平时不太被游客看到。",
-      "pose": "双手推门状，做出‘偷偷探秘’的可爱动作。"
-    },
-    {
-      "name": "体仁阁",
-      "lat": 39.9146,
-      "lng": 116.4003,
-      "image": "img/tirengong.jpg",
-      "details": "体仁阁曾是皇帝学习的地方，“体仁”意为“修身养性”，像个“学院”一样。",
-      "pose": "手拿‘假书’，一边翻页一边眨眼，摆出‘聪明学习中’的样子。"
-    },
-    {
-      "name": "弘义阁",
-      "lat": 39.91465,
-      "lng": 116.3942,
-      "image": "img/hongyige.jpg",
-      "details": "弘义阁保存着古代书籍和典籍，是皇家的“图书馆＋藏书楼”。",
-      "pose": "双手比‘书’的形状（合掌打开），摆出‘知识就是力量’的样子！"
-    },
-    {
-      "name": "东华门",
-      "lat": 39.91555,
-      "lng": 116.40439,
-      "image": "img/donghuamen.jpg",
-      "details": "东华门是故宫东侧的一道门，好像“侧门出口”，走这里可以看到不一样的风景。",
-      "pose": "一手比‘再见’手势，一手指向门口，做个开心的告别动作。"
+// 加载地标数据
+async function loadLandmarks() {
+  if (landmarks30) return landmarks30;
+  
+  try {
+    const response = await fetch('landmarks.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  ];  
+    landmarks30 = await response.json();
+    return landmarks30;
+  } catch (error) {
+    console.error('Error loading landmarks.json:', error);
+    // 如果加载失败，使用默认空数组
+    landmarks30 = [];
+    return landmarks30;
+  }
+}
 
+// 基于题库生成一一对应的打卡点（使用更贴近题干的真实命名与近似坐标）
+async function buildCheckpointsFromQuizzes(quizzes) {
+  // 确保地标数据已加载
+  if (!landmarks30) {
+    await loadLandmarks();
+  }
+  
+  if (!landmarks30 || landmarks30.length === 0) {
+    console.error('Landmarks data not loaded');
+    return [];
+  }
+  
   function getBadgeForQuiz(q) {
     const text = (q.question + ' ' + (q.explanation || '')).toLowerCase();
 
@@ -338,7 +125,79 @@ function buildCheckpointsFromQuizzes(quizzes) {
   });
 }
 
-const checkpoints = buildCheckpointsFromQuizzes(quizzesAll);
+// 地标数据和打卡点（异步加载）
+let checkpoints = [];
+let landmarksLoaded = false;
+
+// 初始化应用（加载地标数据并生成打卡点）
+async function initApp() {
+  if (landmarksLoaded) return;
+  
+  try {
+    await loadLandmarks();
+    checkpoints = await buildCheckpointsFromQuizzes(quizzesAll);
+    landmarksLoaded = true;
+    
+    // 如果在地图页面，重新渲染
+    if (document.getElementById('list-page')?.classList.contains('active')) {
+      renderCheckpointMap();
+      renderListBadges();
+    }
+  } catch (error) {
+    console.error('Error initializing app:', error);
+  }
+}
+
+// 页面加载完成后初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+// 获取landmarks30数组（用于编辑页面）
+function getLandmarks30() {
+  // 从buildCheckpointsFromQuizzes函数中提取landmarks30
+  // 由于landmarks30在函数内部，我们需要通过checkpoints反向获取
+  // 或者直接访问函数内部的landmarks30
+  // 为了简化，我们创建一个全局的landmarks30引用
+  return landmarks30ForEdit || [];
+}
+
+// 编辑页面相关变量
+let editMapInstance = null;
+let editMarkers = [];
+let selectedLandmarkIndex = null;
+let landmarks30ForEdit = null;
+
+// 初始化landmarks30ForEdit（从JSON文件或checkpoints中提取）
+async function initLandmarksForEdit() {
+  if (!landmarks30ForEdit) {
+    // 优先从JSON文件加载
+    if (!landmarks30) {
+      await loadLandmarks();
+    }
+    
+    if (landmarks30 && landmarks30.length > 0) {
+      // 直接从JSON文件复制
+      landmarks30ForEdit = JSON.parse(JSON.stringify(landmarks30));
+    } else if (checkpoints && checkpoints.length > 0) {
+      // 从checkpoints中提取地标信息，创建可编辑的副本
+      landmarks30ForEdit = checkpoints.map((cp) => {
+        return {
+          name: cp.name,
+          lat: cp.lat,
+          lng: cp.lng,
+          image: cp.image,
+          details: cp.knowledge || '',
+          pose: cp.pose || ''
+        };
+      });
+    } else {
+      landmarks30ForEdit = [];
+    }
+  }
+}
 
 // 当前答题/拍照状态
 let hasPhoto = false;
@@ -373,8 +232,18 @@ function showPage(pageId) {
   document.getElementById(pageId).classList.add('active');
 
   if (pageId === 'list-page') {
-    renderCheckpointMap();
-    renderListBadges();
+    // 确保数据已加载
+    if (!landmarksLoaded) {
+      initApp().then(() => {
+        renderCheckpointMap();
+        renderListBadges();
+      });
+    } else {
+      renderCheckpointMap();
+      renderListBadges();
+    }
+  } else if (pageId === 'edit-page') {
+    initEditPage();
   }
   // 首页不再显示徽章
 }
@@ -983,4 +852,288 @@ function highlightLatestBadge() {
     badgeItem.classList.remove('badge-highlight');
     lastEarnedBadgeId = null; // 清除标记
   }, 3000);
+}
+
+// ========== 编辑页面功能 ==========
+
+// 初始化编辑页面
+async function initEditPage() {
+  // 初始化landmarks30ForEdit
+  if (!landmarks30ForEdit) {
+    await initLandmarksForEdit();
+  }
+  
+  // 初始化编辑地图
+  if (!editMapInstance) {
+    initEditMap();
+  }
+  
+  // 渲染地标列表
+  renderEditLandmarkList();
+  
+  // 渲染地图上的地标点
+  renderEditMarkers();
+  
+  // 添加搜索框Enter键事件
+  const searchInput = document.getElementById('edit-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchLandmark();
+      }
+    });
+  }
+}
+
+// 初始化编辑地图
+function initEditMap() {
+  const mapElement = document.getElementById('edit-map');
+  if (!mapElement || editMapInstance) return;
+  
+  editMapInstance = L.map('edit-map').setView([39.916, 116.397], 16);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(editMapInstance);
+}
+
+// 渲染地标列表
+function renderEditLandmarkList() {
+  const listContainer = document.getElementById('edit-landmark-list');
+  if (!listContainer || !landmarks30ForEdit) return;
+  
+  listContainer.innerHTML = '';
+  
+  landmarks30ForEdit.forEach((landmark, index) => {
+    const item = document.createElement('div');
+    item.className = 'edit-landmark-item';
+    if (selectedLandmarkIndex === index) {
+      item.classList.add('selected');
+    }
+    
+    item.innerHTML = `
+      <div class="landmark-name">${landmark.name}</div>
+    `;
+    
+    item.onclick = () => {
+      selectLandmark(index);
+      // 点击列表项时，打开对应的地图标记popup
+      if (editMarkers[index]) {
+        editMarkers[index].openPopup();
+      }
+    };
+    listContainer.appendChild(item);
+  });
+}
+
+// 选中地标
+function selectLandmark(index) {
+  selectedLandmarkIndex = index;
+  renderEditLandmarkList();
+  
+  if (editMarkers[index] && editMapInstance) {
+    const marker = editMarkers[index];
+    editMapInstance.setView(marker.getLatLng(), 18);
+    // 注意：这里不自动打开popup，让用户点击时再打开
+  }
+  
+  showEditStatus(`已选中：${landmarks30ForEdit[index].name}`, false);
+}
+
+// 渲染地图上的地标点（可拖动）
+function renderEditMarkers() {
+  if (!editMapInstance || !landmarks30ForEdit) return;
+  
+  // 清除现有标记
+  editMarkers.forEach(marker => editMapInstance.removeLayer(marker));
+  editMarkers = [];
+  
+  const bounds = [];
+  
+  landmarks30ForEdit.forEach((landmark, index) => {
+    const marker = L.marker([landmark.lat, landmark.lng], {
+      draggable: true,
+      title: landmark.name
+    });
+    
+    marker.bindPopup(`
+      <div style="text-align: center;">
+        <strong>${landmark.name}</strong><br>
+        <small>${landmark.lat.toFixed(6)}, ${landmark.lng.toFixed(6)}</small>
+      </div>
+    `);
+    
+    // 拖动开始
+    marker.on('dragstart', () => {
+      showEditStatus(`正在拖动：${landmark.name}...`, false);
+    });
+    
+    // 拖动结束，更新坐标
+    marker.on('dragend', (e) => {
+      const newLat = e.target.getLatLng().lat;
+      const newLng = e.target.getLatLng().lng;
+      
+      // 更新landmarks30ForEdit中的坐标
+      landmarks30ForEdit[index].lat = newLat;
+      landmarks30ForEdit[index].lng = newLng;
+      
+      // 更新列表显示
+      renderEditLandmarkList();
+      
+      // 更新popup
+      marker.setPopupContent(`
+        <div style="text-align: center;">
+          <strong>${landmark.name}</strong><br>
+          <small>${newLat.toFixed(6)}, ${newLng.toFixed(6)}</small>
+        </div>
+      `);
+      
+      showEditStatus(`已更新：${landmark.name} → ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`, false);
+    });
+    
+    // 点击标记选中并打开popup
+    marker.on('click', () => {
+      selectLandmark(index);
+      marker.openPopup();
+    });
+    
+    editMapInstance.addLayer(marker);
+    editMarkers.push(marker);
+    bounds.push([landmark.lat, landmark.lng]);
+  });
+  
+  // 调整地图视图以显示所有地标
+  if (bounds.length > 0) {
+    editMapInstance.fitBounds(bounds, { padding: [50, 50] });
+  }
+}
+
+// 显示编辑状态消息
+function showEditStatus(message, isError = false) {
+  const statusEl = document.getElementById('edit-status');
+  if (!statusEl) return;
+  
+  statusEl.textContent = message;
+  statusEl.className = `edit-status show ${isError ? 'error' : ''}`;
+  
+  // 3秒后自动隐藏
+  setTimeout(() => {
+    statusEl.classList.remove('show');
+  }, 3000);
+}
+
+// 重置编辑地图视图
+function resetEditMap() {
+  if (!editMapInstance || !landmarks30ForEdit) return;
+  
+  const bounds = landmarks30ForEdit.map(lm => [lm.lat, lm.lng]);
+  if (bounds.length > 0) {
+    editMapInstance.fitBounds(bounds, { padding: [50, 50] });
+    showEditStatus('已重置地图视图', false);
+  }
+}
+
+// 导出坐标（生成可复制的JSON代码）
+function exportLandmarks() {
+  if (!landmarks30ForEdit) {
+    showEditStatus('错误：地标数据未初始化', true);
+    return;
+  }
+  
+  // 生成格式化的JSON字符串
+  const jsonStr = JSON.stringify(landmarks30ForEdit, null, 2);
+  
+  // 创建临时文本区域用于复制
+  const textarea = document.createElement('textarea');
+  textarea.value = jsonStr;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  
+  try {
+    document.execCommand('copy');
+    showEditStatus('✅ 坐标已复制到剪贴板！', false);
+    
+    // 也显示在控制台
+    console.log('=== 地标坐标数据 ===');
+    console.log(jsonStr);
+    console.log('==================');
+  } catch (err) {
+    showEditStatus('❌ 复制失败，请查看控制台', true);
+    console.log('=== 地标坐标数据 ===');
+    console.log(jsonStr);
+    console.log('==================');
+  }
+  
+  document.body.removeChild(textarea);
+}
+
+// 地图搜索（使用OpenStreetMap Nominatim API）
+let searchMarker = null;
+
+function searchLandmark() {
+  const searchInput = document.getElementById('edit-search-input');
+  if (!searchInput || !editMapInstance) return;
+  
+  const searchText = searchInput.value.trim();
+  if (!searchText) {
+    showEditStatus('请输入搜索关键词', false);
+    return;
+  }
+  
+  showEditStatus('正在搜索...', false);
+  
+  // 使用OpenStreetMap Nominatim API进行地理编码搜索
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&limit=1&bounded=1&viewbox=116.2,39.8,116.5,40.0`;
+  
+  fetch(url, {
+    headers: {
+      'User-Agent': 'TourBeijingApp/1.0'
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.length > 0) {
+        const result = data[0];
+        const lat = parseFloat(result.lat);
+        const lng = parseFloat(result.lon);
+        const displayName = result.display_name;
+        
+        // 移除之前的搜索标记
+        if (searchMarker) {
+          editMapInstance.removeLayer(searchMarker);
+        }
+        
+        // 创建新的搜索标记
+        const searchIcon = L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        });
+        
+        searchMarker = L.marker([lat, lng], { icon: searchIcon }).addTo(editMapInstance);
+        searchMarker.bindPopup(`
+          <div style="text-align: center;">
+            <strong>${displayName}</strong><br>
+            <small>${lat.toFixed(6)}, ${lng.toFixed(6)}</small>
+          </div>
+        `);
+        
+        // 平移到搜索结果位置（不改变缩放级别）
+        editMapInstance.panTo([lat, lng]);
+        
+        showEditStatus(`已找到：${displayName}`, false);
+      } else {
+        showEditStatus(`未找到"${searchText}"相关地点`, true);
+      }
+    })
+    .catch(error => {
+      console.error('Search error:', error);
+      showEditStatus('搜索失败，请稍后重试', true);
+    });
 }

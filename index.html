@@ -28,6 +28,7 @@
                     </p>
                 </div>
                 <button class="start-button" onclick="showPage('list-page')">开始寻宝！</button>
+                <button class="start-button" onclick="showPage('edit-page')" style="margin-top: 10px; background: #6c757d;">⚙️ 管理页面</button>
             </section>
 
             <!-- 2. 打卡点列表页 -->
@@ -71,8 +72,8 @@
                                 <div class="photo-upload-icon">📷</div>
                             </div>
                         </div>
-                    </div>
-                </div>
+    </div>
+    </div>
 
                 <div class="task-box">
                     <h4 class="task-title">❓ 回答小问题</h4>
@@ -85,19 +86,19 @@
 
                 <button class="action-button check-in-button" id="check-in-btn"
                     onclick="completeCheckpoint()">我已合影，完成打卡！</button>
-                <button class="action-button back-button" onclick="showPage('list-page')">返回列表</button>
-            </section>
+    <button class="action-button back-button" onclick="showPage('list-page')">返回列表</button>
+    </section>
 
-            <!-- 4. 终极奖励页 -->
-            <section id="reward-page" class="page">
-                <div class="trophy">🏆</div>
-                <h2>恭喜你，故宫小英雄！</h2>
+    <!-- 4. 终极奖励页 -->
+    <section id="reward-page" class="page">
+        <div class="trophy">🏆</div>
+        <h2>恭喜你，故宫小英雄！</h2>
                 <p class="reward-intro">你集齐了所有神兽徽章，成功拼出了藏宝图！</p>
 
-                <div class="certificate">
-                    <h2>🎖️ 故宫小英雄证书 🎖️</h2>
-                    <p>特此授予 <strong>勇敢的寻宝者</strong></p>
-                    <p><strong>"故宫小英雄"</strong>称号！</p>
+        <div class="certificate">
+            <h2>🎖️ 故宫小英雄证书 🎖️</h2>
+            <p>特此授予 <strong>勇敢的寻宝者</strong></p>
+            <p><strong>"故宫小英雄"</strong>称号！</p>
                     <p class="certificate-desc">你成功完成了故宫定向越野挑战，获得了所有神兽的认可，并找回了失落的九龙玉玺！</p>
                     <img id="seal-image" class="seal-image" src="img/九龙玉玺.jpg" alt="九龙玉玺图片">
                     <p class="certificate-footer">🎁 你已获得"故宫小英雄"的荣誉！</p>
@@ -105,7 +106,31 @@
                 <p class="reward-outro">希望你在故宫的寻宝之旅中，学到了很多有趣的知识！下次再来故宫时，别忘了这些神兽朋友哦！👋</p>
                 <button class="start-button reset-btn" onclick="resetGame()">重新开始</button>
             </section>
-        </main>
+
+            <!-- 5. 编辑管理页面 -->
+            <section id="edit-page" class="page">
+                <h2>📍 地标位置管理</h2>
+                <div class="edit-controls">
+                    <button class="map-action-btn" onclick="showPage('home-page')">🏠 返回首页</button>
+                    <button class="map-action-btn" onclick="exportLandmarks()">💾 导出坐标</button>
+                    <button class="map-action-btn" onclick="resetEditMap()">🔄 重置视图</button>
+                </div>
+                <div class="edit-container">
+                    <div class="edit-map-container">
+                        <div class="edit-search-container">
+                            <input type="text" id="edit-search-input" class="edit-search-input" placeholder="搜索地点、地址...">
+                            <button id="edit-search-btn" class="edit-search-btn" onclick="searchLandmark()">🔍</button>
+                        </div>
+                        <div id="edit-map" class="map-view"></div>
+                    </div>
+                    <div class="edit-list-container">
+                        <h3>地标列表</h3>
+                        <div id="edit-landmark-list" class="edit-landmark-list"></div>
+                    </div>
+        </div>
+                <div id="edit-status" class="edit-status"></div>
+    </section>
+    </main>
     </div>
 
     <!-- Leaflet 脚本 -->

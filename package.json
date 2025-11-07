@@ -1,0 +1,32 @@
+{
+  "name": "tour-beijing",
+  "version": "1.0.0",
+  "description": "故宫寻宝：神兽大作战 - 一个基于地图的故宫打卡应用",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -o",
+    "dev": "npx http-server . -p 8080 -o",
+    "update-landmarks": "node update_landmarks.js"
+  },
+  "keywords": [
+    "故宫",
+    "地图",
+    "打卡",
+    "leaflet",
+    "tour"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
+
