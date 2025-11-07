@@ -279,8 +279,32 @@ function renderCheckpointMap() {
       attribution: '&copy; OpenStreetMap'
     }).addTo(mapInstance);
     // 使用聚合
-    markerLayer = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50 });
+    markerLayer = L.markerClusterGroup({ 
+      showCoverageOnHover: false, 
+      maxClusterRadius: 50,
+      zoomToBoundsOnClick: true,  // 点击聚合图标时放大并展开
+      spiderfyOnMaxZoom: true,   // 在最大缩放级别时展开为蜘蛛网
+      removeOutsideVisibleBounds: true
+    });
     mapInstance.addLayer(markerLayer);
+    
+    // 处理聚合图标的点击事件，确保正确放大
+    markerLayer.on('clusterclick', function(a) {
+      const cluster = a.layer;
+      const markers = cluster.getAllChildMarkers();
+      
+      if (markers.length > 0) {
+        // 计算所有标记的边界
+        const group = new L.featureGroup(markers);
+        const bounds = group.getBounds();
+        
+        // 放大到包含所有标记的视图
+        mapInstance.fitBounds(bounds, {
+          padding: [50, 50],
+          maxZoom: 18
+        });
+      }
+    });
 
     // 定义两种状态的 3D 立体图标（带阴影）
     // 优化图标尺寸，使其更明显
@@ -325,10 +349,7 @@ function renderCheckpointMap() {
     marker.bindPopup(popupHtml, {
       maxWidth: 280,
       maxHeight: 350,
-      autoPan: true,
-      autoPanPadding: [50, 50],
-      autoPanPaddingTopLeft: [50, 50],
-      autoPanPaddingBottomRight: [50, 50],
+      autoPan: false,  // 禁用自动平移
       keepInView: true,
       closeButton: true,
       className: 'custom-popup',
@@ -336,7 +357,7 @@ function renderCheckpointMap() {
       autoClose: false
     });
     
-    // 确保弹窗打开时自动平移地图，使弹窗完整显示
+    // 确保弹窗打开时完整显示（仅在popup超出边界时进行最小幅度平移）
     marker.on('popupopen', function() {
       const popup = this.getPopup();
       if (popup && mapInstance) {
@@ -352,42 +373,36 @@ function renderCheckpointMap() {
               // 计算需要的平移量（像素）
               let panX = 0;
               let panY = 0;
-              const padding = 50;
+              const padding = 20; // 减小padding，只在真正需要时平移
               
               // 检查右边界
               if (popupBounds.right > mapRect.right - padding) {
-                panX = popupBounds.right - (mapRect.right - padding);
+                panX = (popupBounds.right - mapRect.right) + padding;
               }
-              // 检查左边界（优先处理左边界，因为通常从左往右阅读）
+              // 检查左边界
               else if (popupBounds.left < mapRect.left + padding) {
-                panX = popupBounds.left - (mapRect.left + padding);
+                panX = (popupBounds.left - mapRect.left) - padding;
               }
               
               // 检查下边界
               if (popupBounds.bottom > mapRect.bottom - padding) {
-                panY = popupBounds.bottom - (mapRect.bottom - padding);
+                panY = (popupBounds.bottom - mapRect.bottom) + padding;
               }
               // 检查上边界
               else if (popupBounds.top < mapRect.top + padding) {
-                panY = popupBounds.top - (mapRect.top + padding);
+                panY = (popupBounds.top - mapRect.top) - padding;
               }
               
-              // 如果有需要平移，执行平移
+              // 如果有需要平移，执行最小幅度的平移（使用panBy而不是panTo）
               if (panX !== 0 || panY !== 0) {
-                const currentCenter = mapInstance.getCenter();
-                // 将像素偏移转换为经纬度偏移
-                const point = mapInstance.latLngToContainerPoint(currentCenter);
-                const newPoint = L.point(point.x - panX, point.y - panY);
-                const newLatLng = mapInstance.containerPointToLatLng(newPoint);
-                
-                mapInstance.panTo(newLatLng, {
+                mapInstance.panBy([panX, panY], {
                   animate: true,
-                  duration: 0.5
+                  duration: 0.2
                 });
               }
             }
           }
-        }, 150);
+        }, 50);
       }
     });
     markerLayer.addLayer(marker);
