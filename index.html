@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -20,10 +21,11 @@
             <!-- 1. 首页 -->
             <section id="home-page" class="page active">
                 <h2>寻找失落的"九龙玉玺"</h2>
-                        <img class="home-hero" src="img/tahe.jpg" alt="故宫太和殿">
+                <img class="home-hero" src="img/tahe.jpg" alt="故宫太和殿">
                 <div class="story-intro">
                     <p>✨ <strong>小皇帝的九龙玉玺被淘气的神兽们藏起来啦！</strong></p>
-                    <p>勇敢的小朋友，你需要去故宫的一些重要地方，找到守护神兽，完成它们指定的任务，就能获得一枚神兽徽章。集齐所有徽章，拼出藏宝图，找到玉玺，你就是<strong>故宫小英雄！</strong>🎉</p>
+                    <p>勇敢的小朋友，你需要去故宫的一些重要地方，找到守护神兽，完成它们指定的任务，就能获得一枚神兽徽章。集齐所有徽章，拼出藏宝图，找到玉玺，你就是<strong>故宫小英雄！</strong>🎉
+                    </p>
                 </div>
                 <button class="start-button" onclick="showPage('list-page')">开始寻宝！</button>
             </section>
@@ -58,15 +60,15 @@
                 <img id="detail-image" class="detail-image" src="" alt="景点图片">
                 <div class="detail-knowledge" id="detail-knowledge"></div>
 
-                <div class="task-box">
-                    <h4 class="task-title">📷 <span class="pose-text" id="detail-pose"></span></h4>
+                <div class="task-box photo-task-box">
+                    <h4 class="task-title">📷 上传合照</h4>
+                    <p class="pose-text" id="detail-pose"></p>
                     <div class="photo-upload-area" id="photo-upload-area">
                         <input id="photo-input" type="file" accept="image/*" capture="environment">
                         <div class="photo-upload-content">
                             <img id="photo-preview" class="photo-preview" src="" alt="预览">
                             <div class="photo-upload-hint" id="photo-upload-hint">
                                 <div class="photo-upload-icon">📷</div>
-                                <div class="photo-upload-text"></div>
                             </div>
                         </div>
                     </div>
