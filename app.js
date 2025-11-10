@@ -224,6 +224,39 @@ const iconDefaults = {
   shadowSize: [41, 41]
 };
 
+// WGS84 转 GCJ-02 坐标转换函数（高德地图使用 GCJ-02 坐标系）
+function wgs84ToGcj02(lng, lat) {
+  const a = 6378245.0; // 长半轴
+  const ee = 0.00669342162296594323; // 偏心率平方
+  
+  let dLat = transformLat(lng - 105.0, lat - 35.0);
+  let dLng = transformLng(lng - 105.0, lat - 35.0);
+  const radLat = lat / 180.0 * Math.PI;
+  let magic = Math.sin(radLat);
+  magic = 1 - ee * magic * magic;
+  const sqrtMagic = Math.sqrt(magic);
+  dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
+  dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
+  
+  return [lng + dLng, lat + dLat];
+}
+
+function transformLat(lng, lat) {
+  let ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
+  ret += (20.0 * Math.sin(6.0 * lng * Math.PI) + 20.0 * Math.sin(2.0 * lng * Math.PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(lat * Math.PI) + 40.0 * Math.sin(lat / 3.0 * Math.PI)) * 2.0 / 3.0;
+  ret += (160.0 * Math.sin(lat / 12.0 * Math.PI) + 320 * Math.sin(lat * Math.PI / 30.0)) * 2.0 / 3.0;
+  return ret;
+}
+
+function transformLng(lng, lat) {
+  let ret = 300.0 + lng + 2.0 * lat + 0.1 * lng * lng + 0.1 * lng * lat + 0.1 * Math.sqrt(Math.abs(lng));
+  ret += (20.0 * Math.sin(6.0 * lng * Math.PI) + 20.0 * Math.sin(2.0 * lng * Math.PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(lng * Math.PI) + 40.0 * Math.sin(lng / 3.0 * Math.PI)) * 2.0 / 3.0;
+  ret += (150.0 * Math.sin(lng / 12.0 * Math.PI) + 300.0 * Math.sin(lng / 30.0 * Math.PI)) * 2.0 / 3.0;
+  return ret;
+}
+
 // 页面切换函数
 function showPage(pageId) {
   document.querySelectorAll('.page').forEach(page => {
@@ -269,14 +302,21 @@ function renderCheckpointMap() {
 
   // 首次创建地图
   if (!mapInstance) {
-    const defaultCenter = [39.9173, 116.3972]; // 故宫中轴近似
+    // 将默认中心点从 WGS84 转换为 GCJ-02（高德地图使用 GCJ-02）
+    const defaultCenterWgs84 = [39.9173, 116.3972]; // 故宫中轴近似（WGS84）
+    const [gcjLng, gcjLat] = wgs84ToGcj02(defaultCenterWgs84[1], defaultCenterWgs84[0]);
     mapInstance = L.map('map', {
-      center: defaultCenter,
+      center: [gcjLat, gcjLng],
       zoom: 16,
       scrollWheelZoom: false
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap'
+    // 高德地图瓦片服务（稳定可靠，无需 API key）
+    // 如果必须使用腾讯地图，需要使用腾讯地图官方 JavaScript SDK 并申请 API key
+    L.tileLayer('https://webrd{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+      subdomains: ['01', '02', '03', '04'],
+      attribution: '&copy; <a href="https://www.amap.com/">高德地图</a>',
+      maxZoom: 18,
+      tileSize: 256
     }).addTo(mapInstance);
     // 使用聚合
     markerLayer = L.markerClusterGroup({ 
@@ -333,14 +373,21 @@ function renderCheckpointMap() {
   const bounds = [];
   checkpoints.forEach(cp => {
     if (typeof cp.lat !== 'number' || typeof cp.lng !== 'number') return;
-    const marker = L.marker([cp.lat, cp.lng], {
+    // 将 WGS84 坐标转换为 GCJ-02 坐标（高德地图使用 GCJ-02）
+    const [gcjLng, gcjLat] = wgs84ToGcj02(cp.lng, cp.lat);
+    const marker = L.marker([gcjLat, gcjLng], {
       title: cp.name,
       icon: cp.completed ? completedIcon : pendingIcon
     });
     const statusText = cp.completed ? `✓ 已获得 ${cp.badgeName} 徽章` : '▶ 去打卡';
+    // 使用缩略图（如果存在）或原图，添加懒加载
+    const thumbImage = cp.image.replace('img/', 'img/thumb/');
     const popupHtml = `
                 <div style="min-width:200px;max-width:280px;padding:12px;box-sizing:border-box;">
-                    <img src="${cp.image}" alt="缩略图" style="width:100%;height:auto;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:8px;display:block;" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}'" />
+                    <img src="${thumbImage}" alt="缩略图" 
+                         style="width:100%;height:auto;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:8px;display:block;" 
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='${cp.image}';this.onerror=function(){this.src='${PLACEHOLDER_IMG}';};" />
                     <div style="font-weight:bold;color:#8B0000;margin-bottom:6px;font-size:16px;">${cp.id}. ${cp.name}</div>
                     <div style="color:#666;margin-bottom:10px;font-size:14px;line-height:1.5;">${cp.knowledge.substring(0, 28)}...</div>
                     <button style="background:#FFD700;color:#8B0000;border:none;border-radius:16px;padding:8px 12px;font-weight:bold;cursor:pointer;width:100%;font-size:14px;box-sizing:border-box;" onclick="showDetail(${cp.id})">${statusText}</button>
@@ -406,7 +453,7 @@ function renderCheckpointMap() {
       }
     });
     markerLayer.addLayer(marker);
-    bounds.push([cp.lat, cp.lng]);
+    bounds.push([gcjLat, gcjLng]);
   });
   if (bounds.length > 0) {
     mapInstance.fitBounds(bounds, { padding: [20, 20] });
@@ -426,16 +473,18 @@ function locateMe() {
   navigator.geolocation.getCurrentPosition(pos => {
     const lat = pos.coords.latitude;
     const lng = pos.coords.longitude;
+    // 将 WGS84 坐标转换为 GCJ-02 坐标（高德地图使用 GCJ-02）
+    const [gcjLng, gcjLat] = wgs84ToGcj02(lng, lat);
     const acc = pos.coords.accuracy || 50;
     if (!userLocationLayer) {
       userLocationLayer = L.layerGroup().addTo(mapInstance);
     }
     userLocationLayer.clearLayers();
-    const me = L.marker([lat, lng], { title: '我的位置' });
-    const circle = L.circle([lat, lng], { radius: acc, color: '#2E8B57', fillColor: '#3CB371', fillOpacity: 0.2, weight: 1 });
+    const me = L.marker([gcjLat, gcjLng], { title: '我的位置' });
+    const circle = L.circle([gcjLat, gcjLng], { radius: acc, color: '#2E8B57', fillColor: '#3CB371', fillOpacity: 0.2, weight: 1 });
     userLocationLayer.addLayer(circle);
     userLocationLayer.addLayer(me);
-    mapInstance.fitBounds(L.latLngBounds([[lat, lng], [lat, lng]]).pad(0.02));
+    mapInstance.fitBounds(L.latLngBounds([[gcjLat, gcjLng], [gcjLat, gcjLng]]).pad(0.02));
   }, err => {
     alert('定位失败，请检查定位权限');
   }, { enableHighAccuracy: true, timeout: 8000 });
@@ -446,7 +495,11 @@ function resetToCheckpoints() {
   if (!mapInstance) return;
   const points = checkpoints
     .filter(cp => typeof cp.lat === 'number' && typeof cp.lng === 'number')
-    .map(cp => [cp.lat, cp.lng]);
+    .map(cp => {
+      // 将 WGS84 坐标转换为 GCJ-02 坐标
+      const [gcjLng, gcjLat] = wgs84ToGcj02(cp.lng, cp.lat);
+      return [gcjLat, gcjLng];
+    });
   if (points.length === 0) return;
   const bounds = L.latLngBounds(points);
   mapInstance.fitBounds(bounds, { padding: [20, 20] });
@@ -462,6 +515,8 @@ function showDetail(id) {
   document.getElementById('detail-title').textContent = cp.name;
   const detailImg = document.getElementById('detail-image');
   detailImg.onerror = () => { detailImg.onerror = null; detailImg.src = PLACEHOLDER_IMG; };
+  // 添加懒加载和错误处理
+  detailImg.loading = 'lazy';
   detailImg.src = cp.image;
   document.getElementById('detail-knowledge').textContent = cp.knowledge;
   const poseTextEl = document.getElementById('detail-pose');
@@ -905,11 +960,17 @@ function initEditMap() {
   const mapElement = document.getElementById('edit-map');
   if (!mapElement || editMapInstance) return;
   
-  editMapInstance = L.map('edit-map').setView([39.916, 116.397], 16);
+  // 将默认中心点从 WGS84 转换为 GCJ-02（高德地图使用 GCJ-02）
+  const defaultCenterWgs84 = [39.916, 116.397];
+  const [gcjLng, gcjLat] = wgs84ToGcj02(defaultCenterWgs84[1], defaultCenterWgs84[0]);
+  editMapInstance = L.map('edit-map').setView([gcjLat, gcjLng], 16);
   
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
+  // 高德地图瓦片服务（稳定可靠，无需 API key）
+  L.tileLayer('https://webrd{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+    subdomains: ['01', '02', '03', '04'],
+    attribution: '&copy; <a href="https://www.amap.com/">高德地图</a>',
+    maxZoom: 18,
+    tileSize: 256
   }).addTo(editMapInstance);
 }
 
@@ -967,15 +1028,18 @@ function renderEditMarkers() {
   const bounds = [];
   
   landmarks30ForEdit.forEach((landmark, index) => {
-    const marker = L.marker([landmark.lat, landmark.lng], {
+    // 将 WGS84 坐标转换为 GCJ-02 坐标（高德地图使用 GCJ-02）
+    const [gcjLng, gcjLat] = wgs84ToGcj02(landmark.lng, landmark.lat);
+    const marker = L.marker([gcjLat, gcjLng], {
       draggable: true,
       title: landmark.name
     });
     
+    // Popup 显示 GCJ-02 坐标（用户在地图上看到的坐标）
     marker.bindPopup(`
       <div style="text-align: center;">
         <strong>${landmark.name}</strong><br>
-        <small>${landmark.lat.toFixed(6)}, ${landmark.lng.toFixed(6)}</small>
+        <small>${gcjLat.toFixed(6)}, ${gcjLng.toFixed(6)}</small>
       </div>
     `);
     
@@ -989,14 +1053,15 @@ function renderEditMarkers() {
       const newLat = e.target.getLatLng().lat;
       const newLng = e.target.getLatLng().lng;
       
-      // 更新landmarks30ForEdit中的坐标
-      landmarks30ForEdit[index].lat = newLat;
-      landmarks30ForEdit[index].lng = newLng;
+      // 将 GCJ-02 坐标转换回 WGS84（因为 landmarks.json 中存储的是 WGS84）
+      const [wgsLng, wgsLat] = gcj02ToWgs84(newLng, newLat);
+      landmarks30ForEdit[index].lat = wgsLat;
+      landmarks30ForEdit[index].lng = wgsLng;
       
       // 更新列表显示
       renderEditLandmarkList();
       
-      // 更新popup
+      // 更新popup（显示 GCJ-02 坐标）
       marker.setPopupContent(`
         <div style="text-align: center;">
           <strong>${landmark.name}</strong><br>
@@ -1004,7 +1069,7 @@ function renderEditMarkers() {
         </div>
       `);
       
-      showEditStatus(`已更新：${landmark.name} → ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`, false);
+      showEditStatus(`已更新：${landmark.name} → ${newLat.toFixed(6)}, ${newLng.toFixed(6)} (GCJ-02)`, false);
     });
     
     // 点击标记选中并打开popup
@@ -1015,7 +1080,7 @@ function renderEditMarkers() {
     
     editMapInstance.addLayer(marker);
     editMarkers.push(marker);
-    bounds.push([landmark.lat, landmark.lng]);
+    bounds.push([gcjLat, gcjLng]);
   });
   
   // 调整地图视图以显示所有地标
@@ -1038,11 +1103,34 @@ function showEditStatus(message, isError = false) {
   }, 3000);
 }
 
+// GCJ-02 转 WGS84 坐标转换函数（反向转换）
+function gcj02ToWgs84(lng, lat) {
+  const a = 6378245.0;
+  const ee = 0.00669342162296594323;
+  
+  let dLat = transformLat(lng - 105.0, lat - 35.0);
+  let dLng = transformLng(lng - 105.0, lat - 35.0);
+  const radLat = lat / 180.0 * Math.PI;
+  let magic = Math.sin(radLat);
+  magic = 1 - ee * magic * magic;
+  const sqrtMagic = Math.sqrt(magic);
+  dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
+  dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
+  
+  return [lng - dLng, lat - dLat];
+}
+
 // 重置编辑地图视图
 function resetEditMap() {
   if (!editMapInstance || !landmarks30ForEdit) return;
   
-  const bounds = landmarks30ForEdit.map(lm => [lm.lat, lm.lng]);
+  // 将 WGS84 坐标转换为 GCJ-02 坐标
+  const bounds = landmarks30ForEdit
+    .filter(lm => typeof lm.lat === 'number' && typeof lm.lng === 'number')
+    .map(lm => {
+      const [gcjLng, gcjLat] = wgs84ToGcj02(lm.lng, lm.lat);
+      return [gcjLat, gcjLng];
+    });
   if (bounds.length > 0) {
     editMapInstance.fitBounds(bounds, { padding: [50, 50] });
     showEditStatus('已重置地图视图', false);
@@ -1131,16 +1219,18 @@ function searchLandmark() {
           shadowSize: [41, 41]
         });
         
-        searchMarker = L.marker([lat, lng], { icon: searchIcon }).addTo(editMapInstance);
+        // 将 WGS84 坐标转换为 GCJ-02 坐标（高德地图使用 GCJ-02）
+        const [gcjLng, gcjLat] = wgs84ToGcj02(lng, lat);
+        searchMarker = L.marker([gcjLat, gcjLng], { icon: searchIcon }).addTo(editMapInstance);
         searchMarker.bindPopup(`
           <div style="text-align: center;">
             <strong>${displayName}</strong><br>
-            <small>${lat.toFixed(6)}, ${lng.toFixed(6)}</small>
+            <small>${gcjLat.toFixed(6)}, ${gcjLng.toFixed(6)}</small>
           </div>
         `);
         
         // 平移到搜索结果位置（不改变缩放级别）
-        editMapInstance.panTo([lat, lng]);
+        editMapInstance.panTo([gcjLat, gcjLng]);
         
         showEditStatus(`已找到：${displayName}`, false);
       } else {
@@ -1151,4 +1241,17 @@ function searchLandmark() {
       console.error('Search error:', error);
       showEditStatus('搜索失败，请稍后重试', true);
     });
+}
+
+// 确保所有在 HTML 中通过 onclick 调用的函数都在全局作用域中可用
+if (typeof window !== 'undefined') {
+  window.showPage = showPage;
+  window.showDetail = showDetail;
+  window.completeCheckpoint = completeCheckpoint;
+  window.resetGame = resetGame;
+  window.locateMe = locateMe;
+  window.resetToCheckpoints = resetToCheckpoints;
+  window.exportLandmarks = exportLandmarks;
+  window.resetEditMap = resetEditMap;
+  window.searchLandmark = searchLandmark;
 }
